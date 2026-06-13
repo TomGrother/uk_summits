@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { getBadgesForUser } = require('./badges');
 
 const router = express.Router();
 
@@ -30,6 +31,11 @@ router.get('/progress', requireAuth, (req, res) => {
   const total = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
   const completed = db.prepare('SELECT COUNT(*) AS c FROM completions WHERE user_id = ?').get(req.user.id).c;
   res.json({ total, completed });
+});
+
+// Get the logged-in user's earned badges.
+router.get('/badges', requireAuth, (req, res) => {
+  res.json({ badges: getBadgesForUser(req.user.id) });
 });
 
 // Mark a summit as completed.

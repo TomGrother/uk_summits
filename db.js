@@ -39,8 +39,19 @@ CREATE TABLE IF NOT EXISTS completions (
   UNIQUE(user_id, summit_id)
 );
 
+CREATE TABLE IF NOT EXISTS friendships (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  requester_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  recipient_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(requester_id, recipient_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_summits_region ON summits(region);
 CREATE INDEX IF NOT EXISTS idx_completions_user ON completions(user_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_requester ON friendships(requester_id);
+CREATE INDEX IF NOT EXISTS idx_friendships_recipient ON friendships(recipient_id);
 `);
 
 const summitColumns = db.prepare("PRAGMA table_info(summits)").all().map(c => c.name);

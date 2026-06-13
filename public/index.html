@@ -15,11 +15,29 @@
 
   <main>
     <aside id="sidebar" class="sidebar">
+      <div id="badgeStrip" class="badge-strip"></div>
       <div id="regionList" class="region-list"></div>
     </aside>
     <div id="map"></div>
     <div id="progress" class="progress"></div>
   </main>
+
+  <!-- Friends panel -->
+  <div id="friendsModal" class="modal hidden">
+    <div class="modal-content friends-content">
+      <button class="close-btn" id="closeFriends">&times;</button>
+      <h2>Friends</h2>
+
+      <form id="addFriendForm" class="add-friend-form">
+        <input name="username" placeholder="Friend's username" required />
+        <button type="submit">Add</button>
+      </form>
+      <p class="error" id="friendError"></p>
+
+      <div id="friendRequests" class="friend-requests"></div>
+      <div id="friendList" class="friend-list"></div>
+    </div>
+  </div>
 
   <!-- Logged-out welcome / gate -->
   <div id="welcomeGate" class="modal hidden">

@@ -44,6 +44,46 @@ main {
   flex-shrink: 0;
 }
 
+.badge-strip {
+  padding: 12px 14px;
+  border-bottom: 1px solid #ddd;
+  background: #fff;
+}
+.badge-strip h3 { margin: 0 0 8px; font-size: 0.95rem; }
+.badge-hint { margin: 0; font-size: 0.8rem; color: #888; }
+.badge-icons { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge {
+  font-size: 1.3rem;
+  background: #f0f4ef;
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: default;
+}
+
+.friends-content { width: 380px; max-width: 90vw; text-align: left; }
+.add-friend-form { display: flex; gap: 8px; margin: 12px 0; }
+.add-friend-form input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+.add-friend-form button {
+  background: #4caf50; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer;
+}
+.friend-requests h3, .friend-list h3 { margin: 12px 0 8px; font-size: 1rem; }
+.friend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+.friend-row button {
+  padding: 6px 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+  background: #4caf50; color: #fff;
+}
+.friend-row button.secondary { background: transparent; border: 1px solid #c0392b; color: #c0392b; }
+.friend-card { flex-direction: column; align-items: stretch; gap: 6px; }
+.friend-info { display: flex; justify-content: space-between; font-weight: 600; }
+.friend-progress { font-weight: 400; color: #666; font-size: 0.85rem; }
+
 .region-group { border-bottom: 1px solid #e0e0e0; }
 .region-header {
   display: flex;
