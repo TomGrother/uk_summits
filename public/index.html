@@ -46,15 +46,51 @@
   <!-- Logged-out welcome / gate -->
   <div id="welcomeGate" class="modal hidden">
     <div class="modal-content welcome-content">
-      <h2>Welcome to UK Summits</h2>
-      <p>Track your progress on the 189 Welsh Nuttalls &mdash; every mountain in Wales over 2000ft.</p>
-      <ul class="welcome-list">
-        <li>Browse the satellite map and explore every summit's location.</li>
-        <li>Create a free account to mark summits as climbed.</li>
-        <li>Watch your completed total grow as you tick off the list.</li>
-      </ul>
+      <div class="welcome-hero">
+        <div class="welcome-hero-emoji">⛰️</div>
+        <h2>UK Summits</h2>
+        <p class="welcome-tagline">Your interactive checklist for the 189 Welsh Nuttalls</p>
+      </div>
+
+      <p class="welcome-intro">
+        The <strong>Nuttalls</strong> are every mountain in Wales over 2,000ft (610m) with at least
+        15m of drop on all sides &mdash; 189 summits in total, from Snowdon down to the smallest
+        subsidiary tops. UK Summits is a free tracker to help you explore them all.
+      </p>
+
+      <div class="welcome-features">
+        <div class="welcome-feature">
+          <span class="welcome-feature-icon">🗺️</span>
+          <div>
+            <strong>Explore the map</strong>
+            <p>Satellite view of Wales with every summit marked, grouped by region.</p>
+          </div>
+        </div>
+        <div class="welcome-feature">
+          <span class="welcome-feature-icon">✅</span>
+          <div>
+            <strong>Track your progress</strong>
+            <p>Tick off summits as you climb them and watch your total grow toward 189.</p>
+          </div>
+        </div>
+        <div class="welcome-feature">
+          <span class="welcome-feature-icon">🏆</span>
+          <div>
+            <strong>Earn badges</strong>
+            <p>Unlock milestones and region-completion badges as you go.</p>
+          </div>
+        </div>
+        <div class="welcome-feature">
+          <span class="welcome-feature-icon">🤝</span>
+          <div>
+            <strong>Compare with friends</strong>
+            <p>Add friends and see how your progress stacks up against theirs.</p>
+          </div>
+        </div>
+      </div>
+
       <div class="welcome-actions">
-        <button id="welcomeRegister">Create account</button>
+        <button id="welcomeRegister">Create free account</button>
         <button class="secondary" id="welcomeLogin">I have an account</button>
       </div>
       <button class="secondary welcome-explore" id="welcomeExplore">Just let me look at the map</button>

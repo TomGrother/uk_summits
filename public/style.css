@@ -220,11 +220,62 @@ main {
 .auth-form .hint { font-size: 0.8rem; color: #777; margin: 0; }
 
 .welcome-content {
-  width: 420px;
-  max-width: 90vw;
+  width: 480px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
   text-align: center;
+  padding: 0;
 }
-.welcome-content h2 { margin-top: 0; }
+.welcome-content h2 { margin: 0; }
+
+.welcome-hero {
+  background: linear-gradient(135deg, #1b3a2b, #2e7d32);
+  color: #fff;
+  padding: 28px 24px 22px;
+  border-radius: 10px 10px 0 0;
+}
+.welcome-hero-emoji { font-size: 2.4rem; margin-bottom: 4px; }
+.welcome-tagline {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  color: #d7ead9;
+}
+
+.welcome-intro {
+  text-align: left;
+  margin: 18px 24px 4px;
+  color: #444;
+  line-height: 1.5;
+  font-size: 0.92rem;
+}
+
+.welcome-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 24px;
+  text-align: left;
+}
+.welcome-feature {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #f4f6f4;
+  border-radius: 8px;
+  padding: 10px;
+}
+.welcome-feature-icon { font-size: 1.4rem; line-height: 1; }
+.welcome-feature strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
+.welcome-feature p { margin: 0; font-size: 0.78rem; color: #666; line-height: 1.35; }
+
+.welcome-content .welcome-actions,
+.welcome-content .welcome-explore {
+  margin-left: 24px;
+  margin-right: 24px;
+  width: auto;
+}
+.welcome-content .welcome-explore { margin-bottom: 20px; }
 .welcome-list {
   text-align: left;
   margin: 16px 0;
@@ -233,6 +284,7 @@ main {
   line-height: 1.5;
 }
 .welcome-actions {
+  margin-top: 18px;
   display: flex;
   gap: 10px;
   margin-top: 8px;
