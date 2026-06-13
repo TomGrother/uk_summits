@@ -40,7 +40,6 @@ async function loadSummits() {
   const res = await fetch(`${API}/summits`, { headers: authHeaders() });
   summits = await res.json();
   renderMarkers();
-  renderList();
   renderProgress();
 }
 
@@ -55,23 +54,11 @@ async function renderProgress() {
   el.textContent = `${data.completed} / ${data.total} summits completed`;
 }
 
-// Minimum summit height (m) to show at each zoom level, so the map
-// starts with just the major peaks and reveals smaller ones as you zoom in.
-function heightThresholdForZoom(zoom) {
-  if (zoom < 7) return 1000;
-  if (zoom < 8) return 800;
-  if (zoom < 9) return 600;
-  if (zoom < 10) return 400;
-  return 0;
-}
-
 function renderMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers.clear();
 
-  const minHeight = heightThresholdForZoom(map.getZoom());
-
-  summits.filter(s => s.height_m >= minHeight).forEach(s => {
+  summits.forEach(s => {
     const color = s.completed ? '#2e7d32' : '#d32f2f';
     const marker = L.circleMarker([s.lat, s.lng], {
       radius: 6,
@@ -114,46 +101,11 @@ async function toggleCompletion(id) {
 
   summit.completed = !summit.completed;
   renderMarkers();
-  renderList();
   renderProgress();
 
   const m = markers.get(id);
   if (m) m.openPopup();
 }
-
-function renderList() {
-  const search = document.getElementById('search').value.toLowerCase();
-  const region = document.getElementById('regionFilter').value;
-  const ul = document.getElementById('summitList');
-  ul.innerHTML = '';
-
-  summits
-    .filter(s => s.name.toLowerCase().includes(search))
-    .filter(s => !region || s.region === region)
-    .forEach(s => {
-      const li = document.createElement('li');
-      li.className = s.completed ? 'completed' : '';
-      li.innerHTML = `
-        ${currentUser ? `<input type="checkbox" ${s.completed ? 'checked' : ''} />` : ''}
-        <span class="name">${s.name}</span>
-        <span class="meta">${s.height_m} m</span>
-      `;
-      li.onclick = (e) => {
-        if (e.target.tagName === 'INPUT' && currentUser) {
-          toggleCompletion(s.id);
-        } else {
-          map.setView([s.lat, s.lng], 12);
-          markers.get(s.id)?.openPopup();
-        }
-      };
-      ul.appendChild(li);
-    });
-}
-
-map.on('zoomend', renderMarkers);
-
-document.getElementById('search').addEventListener('input', renderList);
-document.getElementById('regionFilter').addEventListener('change', renderList);
 
 // --- Auth modal ---
 const authModal = document.getElementById('authModal');
