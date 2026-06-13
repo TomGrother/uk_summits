@@ -475,6 +475,26 @@ async function loadGallery(summitId) {
   }
 }
 
+function renderReviewRow(r) {
+  return `
+    <div class="review-row">
+      <div class="review-row-head">
+        <span class="review-stars">${starString(r.rating)}</span>
+        <span class="review-author">${r.username}</span>
+      </div>
+      ${r.body ? `<p class="review-body">${r.body}</p>` : ''}
+    </div>
+  `;
+}
+
+function openFullReviews(summit, reviews) {
+  document.getElementById('fullReviewsTitle').textContent = summit ? `Reviews for ${summit.name}` : 'Reviews';
+  document.getElementById('fullReviewsList').innerHTML = reviews.length
+    ? reviews.map(renderReviewRow).join('')
+    : '<p class="reviews-empty">No reviews yet.</p>';
+  document.getElementById('fullReviewsModal').classList.remove('hidden');
+}
+
 async function loadReviews(summitId) {
   const el = document.querySelector(`[data-reviews="${summitId}"]`);
   if (!el) return;
@@ -489,6 +509,9 @@ async function loadReviews(summitId) {
   const avg = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
+
+  const PREVIEW_COUNT = 3;
+  const preview = others.slice(0, PREVIEW_COUNT);
 
   el.innerHTML = `
     <h4 class="reviews-heading">
@@ -507,17 +530,15 @@ async function loadReviews(summitId) {
       </form>
     ` : ''}
     <div class="review-list">
-      ${others.length ? others.map(r => `
-        <div class="review-row">
-          <div class="review-row-head">
-            <span class="review-stars">${starString(r.rating)}</span>
-            <span class="review-author">${r.username}</span>
-          </div>
-          ${r.body ? `<p class="review-body">${r.body}</p>` : ''}
-        </div>
-      `).join('') : '<p class="reviews-empty">No reviews yet &mdash; be the first to share your experience!</p>'}
+      ${preview.length ? preview.map(renderReviewRow).join('') : '<p class="reviews-empty">No reviews yet &mdash; be the first to share your experience!</p>'}
     </div>
+    ${others.length > PREVIEW_COUNT ? `<button class="gallery-view-all" data-view-all-reviews="${summitId}">View all ${reviews.length} reviews</button>` : ''}
   `;
+
+  const viewAllBtn = el.querySelector('[data-view-all-reviews]');
+  if (viewAllBtn) {
+    viewAllBtn.onclick = () => openFullReviews(summits.find(s => s.id === summitId), reviews);
+  }
 
   const form = el.querySelector('[data-review-form]');
   if (form) {
