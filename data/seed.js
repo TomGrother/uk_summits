@@ -9,13 +9,19 @@ const insert = db.prepare(`
   VALUES (@name, @region, @classification, @height_m, @lat, @lng)
 `);
 
+const reset = process.argv.includes('--reset');
+
 const existing = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
-if (existing > 0) {
-  console.log(`summits table already has ${existing} rows, skipping seed`);
+if (existing > 0 && !reset) {
+  console.log(`summits table already has ${existing} rows, skipping seed (use --reset to replace)`);
 } else {
   const run = db.transaction((rows) => {
+    if (reset) {
+      db.exec('DELETE FROM completions');
+      db.exec('DELETE FROM summits');
+    }
     for (const s of rows) insert.run(s);
   });
   run(summits);
-  console.log(`Seeded ${summits.length} summits`);
+  console.log(`Seeded ${summits.length} summits${reset ? ' (reset)' : ''}`);
 }
