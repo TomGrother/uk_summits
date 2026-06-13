@@ -81,10 +81,6 @@
         <dd>Badges are awarded for milestones (e.g. your first summit, 10, 25, 50, 100 and all 189)
           and for completing every summit in a region. View yours from the Badges menu.</dd>
 
-        <dt>Can I see my friends' progress?</dt>
-        <dd>Yes. Use the Friends menu to search for other users by username, send a friend
-          request, and once accepted you'll see their progress and badges.</dd>
-
         <dt>The site is in beta &mdash; what does that mean?</dt>
         <dd>It means we're still actively building and refining SummitStack. Some features may
           change, and you might spot the occasional bug. Thanks for bearing with us!</dd>
@@ -102,24 +98,11 @@
         <li><strong>Sidebar &rsaquo; Search</strong> &mdash; find a summit by name</li>
         <li><strong>Sidebar &rsaquo; Regions</strong> &mdash; browse summits grouped by area, zoom to region</li>
         <li><strong>Badges</strong> &mdash; view your earned and locked achievements</li>
-        <li><strong>Friends</strong> &mdash; manage friend requests and view friends' progress</li>
         <li><strong>Account</strong> &mdash; login / register / logout</li>
         <li><strong>About Us</strong> &mdash; information about this project</li>
         <li><strong>FAQ</strong> &mdash; frequently asked questions</li>
       </ul>
     </div>
-  </div>
-
-  <!-- Friends dropdown -->
-  <div id="friendsDropdown" class="nav-dropdown hidden">
-    <form id="addFriendForm" class="add-friend-form">
-      <input name="username" placeholder="Friend's username" required />
-      <button type="submit">Add</button>
-    </form>
-    <p class="error" id="friendError"></p>
-
-    <div id="friendRequests" class="friend-requests"></div>
-    <div id="friendList" class="friend-list"></div>
   </div>
 
   <!-- Badges dropdown -->
@@ -165,13 +148,6 @@
           <div>
             <strong>Earn badges</strong>
             <p>Unlock milestones and region-completion badges as you go.</p>
-          </div>
-        </div>
-        <div class="welcome-feature">
-          <span class="welcome-feature-icon">🤝</span>
-          <div>
-            <strong>Compare with friends</strong>
-            <p>Add friends and see how your progress stacks up against theirs.</p>
           </div>
         </div>
       </div>

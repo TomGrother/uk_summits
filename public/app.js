@@ -33,9 +33,8 @@ function renderAuthArea() {
   const navEl = document.getElementById('navArea');
   const el = document.getElementById('authArea');
   if (currentUser) {
-    navEl.innerHTML = `<button class="secondary nav-btn" id="friendsBtn">Friends</button><button class="secondary nav-btn" id="badgesBtn">Badges</button>`
+    navEl.innerHTML = `<button class="secondary nav-btn" id="badgesBtn">Badges</button>`
       + (currentUser.isAdmin ? `<button class="secondary nav-btn" id="adminBtn">Admin</button>` : '');
-    document.getElementById('friendsBtn').onclick = () => toggleDropdown('friendsDropdown', loadFriends);
     document.getElementById('badgesBtn').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
     if (currentUser.isAdmin) {
       document.getElementById('adminBtn').onclick = () => toggleDropdown('adminDropdown', loadAdminPanel);
@@ -50,7 +49,6 @@ function renderAuthArea() {
 }
 
 const DROPDOWNS = {
-  friendsDropdown: 'friendsBtn',
   badgesDropdown: 'badgesBtn',
   adminDropdown: 'adminBtn',
 };
@@ -313,70 +311,6 @@ async function loadAdminPanel() {
     };
   });
 }
-
-async function loadFriends() {
-  const [friendsRes, requestsRes] = await Promise.all([
-    fetch(`${API}/friends`, { headers: authHeaders() }),
-    fetch(`${API}/friends/requests`, { headers: authHeaders() }),
-  ]);
-  const { friends } = await friendsRes.json();
-  const { requests } = await requestsRes.json();
-
-  const reqEl = document.getElementById('friendRequests');
-  reqEl.innerHTML = requests.length
-    ? `<h3>Requests</h3>${requests.map(r => `
-        <div class="friend-row">
-          <span>${r.username}</span>
-          <button data-accept="${r.id}">Accept</button>
-          <button class="secondary" data-decline="${r.id}">Decline</button>
-        </div>
-      `).join('')}`
-    : '';
-
-  reqEl.querySelectorAll('[data-accept]').forEach(btn => {
-    btn.onclick = async () => {
-      await fetch(`${API}/friends/${btn.dataset.accept}/accept`, { method: 'POST', headers: authHeaders() });
-      loadFriends();
-    };
-  });
-  reqEl.querySelectorAll('[data-decline]').forEach(btn => {
-    btn.onclick = async () => {
-      await fetch(`${API}/friends/${btn.dataset.decline}`, { method: 'DELETE', headers: authHeaders() });
-      loadFriends();
-    };
-  });
-
-  const listEl = document.getElementById('friendList');
-  listEl.innerHTML = friends.length
-    ? `<h3>Your Friends</h3>${friends.map(f => `
-        <div class="friend-row friend-card">
-          <div class="friend-info">
-            <span class="friend-name">${f.username}</span>
-            <span class="friend-progress">${f.completed}/${f.total} summits</span>
-          </div>
-          <div class="badge-icons">
-            ${f.badges.map(b => `<span class="badge" title="${b.label}">${b.icon}</span>`).join('')}
-          </div>
-        </div>
-      `).join('')}`
-    : '<p class="badge-hint">No friends yet. Add someone by username above.</p>';
-}
-
-document.getElementById('addFriendForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const form = new FormData(e.target);
-  const res = await fetch(`${API}/friends/request`, {
-    method: 'POST',
-    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: form.get('username') }),
-  });
-  const data = await res.json();
-  const errEl = document.getElementById('friendError');
-  if (!res.ok) { errEl.textContent = data.error; return; }
-  errEl.textContent = '';
-  e.target.reset();
-  loadFriends();
-});
 
 async function renderProgress() {
   const el = document.getElementById('progress');
