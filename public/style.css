@@ -285,17 +285,21 @@ main {
   bottom: 14px;
   right: 14px;
   z-index: 500;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  font-size: 1.3rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 6px;
   justify-content: center;
+  white-space: nowrap;
 }
 .locate-btn:hover { background: var(--bg); }
 .locate-btn.locating { opacity: 0.6; }
@@ -646,9 +650,10 @@ main {
   #map { flex: 1; min-height: 0; }
 
   .progress {
-    top: auto;
-    bottom: 10px;
-    right: 10px;
+    top: 10px;
+    left: 10px;
+    right: auto;
+    bottom: auto;
   }
 
   .site-footer {
