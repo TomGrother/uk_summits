@@ -397,7 +397,7 @@ function popupHtml(s) {
             <input type="file" accept="image/*" data-upload="${s.id}" hidden />
           </label>
         ` : ''}
-        <div class="summit-reviews" data-reviews="${s.id}">
+        <div class="summit-reviews-summary" data-reviews="${s.id}">
           <p class="reviews-loading">Loading reviews&hellip;</p>
         </div>
       </div>
@@ -489,9 +489,55 @@ function renderReviewRow(r) {
 
 function openFullReviews(summit, reviews) {
   document.getElementById('fullReviewsTitle').textContent = summit ? `Reviews for ${summit.name}` : 'Reviews';
-  document.getElementById('fullReviewsList').innerHTML = reviews.length
-    ? reviews.map(renderReviewRow).join('')
-    : '<p class="reviews-empty">No reviews yet.</p>';
+
+  const myReview = currentUser ? reviews.find(r => r.username === currentUser.username) : null;
+  const others = reviews.filter(r => r !== myReview);
+
+  document.getElementById('fullReviewsList').innerHTML = `
+    ${currentUser ? `
+      <form class="review-form" data-review-form="${summit.id}">
+        <select name="rating">
+          ${[5, 4, 3, 2, 1].map(n => `<option value="${n}" ${myReview && myReview.rating === n ? 'selected' : ''}>${starString(n)}</option>`).join('')}
+        </select>
+        <textarea name="body" placeholder="Share your thoughts on this summit..." maxlength="1000">${myReview ? myReview.body : ''}</textarea>
+        <div class="review-form-actions">
+          <button type="submit" class="popup-btn">${myReview ? 'Update review' : 'Post review'}</button>
+          ${myReview ? '<button type="button" class="review-delete-btn" data-delete-review>Delete</button>' : ''}
+        </div>
+      </form>
+    ` : ''}
+    ${myReview ? renderReviewRow(myReview) : ''}
+    ${others.length ? others.map(renderReviewRow).join('') : (myReview ? '' : '<p class="reviews-empty">No reviews yet &mdash; be the first to share your experience!</p>')}
+  `;
+
+  const form = document.querySelector('#fullReviewsList [data-review-form]');
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      await fetch(`${API}/summits/${summit.id}/reviews`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: Number(formData.get('rating')), body: formData.get('body') }),
+      });
+      const res = await fetch(`${API}/summits/${summit.id}/reviews`);
+      const data = await res.json();
+      openFullReviews(summit, data.reviews || []);
+      loadReviews(summit.id);
+    };
+  }
+
+  const deleteBtn = document.querySelector('#fullReviewsList [data-delete-review]');
+  if (deleteBtn) {
+    deleteBtn.onclick = async () => {
+      await fetch(`${API}/summits/${summit.id}/reviews`, { method: 'DELETE', headers: authHeaders() });
+      const res = await fetch(`${API}/summits/${summit.id}/reviews`);
+      const data = await res.json();
+      openFullReviews(summit, data.reviews || []);
+      loadReviews(summit.id);
+    };
+  }
+
   document.getElementById('fullReviewsModal').classList.remove('hidden');
 }
 
@@ -503,64 +549,20 @@ async function loadReviews(summitId) {
   if (!el.isConnected) return;
 
   const reviews = data.reviews || [];
-  const myReview = currentUser ? reviews.find(r => r.username === currentUser.username) : null;
-  const others = reviews.filter(r => r !== myReview);
-
   const avg = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
-  const PREVIEW_COUNT = 3;
-  const preview = others.slice(0, PREVIEW_COUNT);
-
   el.innerHTML = `
-    <h4 class="reviews-heading">
-      Reviews ${avg ? `<span class="reviews-avg">${starString(Math.round(avg))} ${avg} (${reviews.length})</span>` : ''}
-    </h4>
-    ${currentUser ? `
-      <form class="review-form" data-review-form="${summitId}">
-        <select name="rating">
-          ${[5, 4, 3, 2, 1].map(n => `<option value="${n}" ${myReview && myReview.rating === n ? 'selected' : ''}>${starString(n)}</option>`).join('')}
-        </select>
-        <textarea name="body" placeholder="Share your thoughts on this summit..." maxlength="1000">${myReview ? myReview.body : ''}</textarea>
-        <div class="review-form-actions">
-          <button type="submit" class="popup-btn">${myReview ? 'Update review' : 'Post review'}</button>
-          ${myReview ? '<button type="button" class="review-delete-btn" data-delete-review>Delete</button>' : ''}
-        </div>
-      </form>
-    ` : ''}
-    <div class="review-list">
-      ${preview.length ? preview.map(renderReviewRow).join('') : '<p class="reviews-empty">No reviews yet &mdash; be the first to share your experience!</p>'}
+    <div class="reviews-summary-row">
+      ${avg
+        ? `<span class="reviews-avg">${starString(Math.round(avg))} ${avg} <span class="reviews-count">(${reviews.length})</span></span>`
+        : `<span class="reviews-avg reviews-none">No reviews yet</span>`}
+      <button class="read-reviews-btn" data-read-reviews="${summitId}">Read reviews</button>
     </div>
-    ${others.length > PREVIEW_COUNT ? `<button class="gallery-view-all" data-view-all-reviews="${summitId}">View all ${reviews.length} reviews</button>` : ''}
   `;
 
-  const viewAllBtn = el.querySelector('[data-view-all-reviews]');
-  if (viewAllBtn) {
-    viewAllBtn.onclick = () => openFullReviews(summits.find(s => s.id === summitId), reviews);
-  }
-
-  const form = el.querySelector('[data-review-form]');
-  if (form) {
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      await fetch(`${API}/summits/${summitId}/reviews`, {
-        method: 'POST',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating: Number(formData.get('rating')), body: formData.get('body') }),
-      });
-      loadReviews(summitId);
-    };
-  }
-
-  const deleteBtn = el.querySelector('[data-delete-review]');
-  if (deleteBtn) {
-    deleteBtn.onclick = async () => {
-      await fetch(`${API}/summits/${summitId}/reviews`, { method: 'DELETE', headers: authHeaders() });
-      loadReviews(summitId);
-    };
-  }
+  el.querySelector('[data-read-reviews]').onclick = () => openFullReviews(summits.find(s => s.id === summitId), reviews);
 }
 
 function openFullGallery(images) {

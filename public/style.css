@@ -640,26 +640,37 @@ main {
 
 .summit-gallery { margin-top: 10px; }
 
-.summit-reviews { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+.summit-reviews-summary { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
 .reviews-loading, .reviews-empty {
   margin: 0;
   font-size: 0.78rem;
   color: var(--text-muted);
 }
-.reviews-heading {
-  margin: 0 0 8px;
-  font-size: 0.9rem;
+.reviews-summary-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 .reviews-avg {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--accent-dark);
   letter-spacing: 0.05em;
 }
+.reviews-avg.reviews-none { color: var(--text-muted); font-weight: 500; letter-spacing: normal; font-size: 0.8rem; }
+.reviews-count { color: var(--text-muted); font-weight: 500; letter-spacing: normal; }
+.read-reviews-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.read-reviews-btn:hover { background: rgba(24, 166, 115, 0.1); }
 .review-form {
   display: flex;
   flex-direction: column;
