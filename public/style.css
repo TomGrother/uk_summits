@@ -651,9 +651,11 @@ main {
 
   .progress {
     top: 10px;
-    left: 10px;
-    right: auto;
+    right: 10px;
+    left: auto;
     bottom: auto;
+    padding: 5px 10px;
+    font-size: 0.75rem;
   }
 
   .site-footer {
