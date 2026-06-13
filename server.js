@@ -8,6 +8,7 @@ const db = require('./db');
 
 const authRoutes = require('./routes/auth');
 const summitRoutes = require('./routes/summits');
+const adminRoutes = require('./routes/admin');
 
 // Populate the summits table on first run (no-op if already seeded).
 (function seedIfEmpty() {
@@ -46,6 +47,7 @@ app.use((req, res, next) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/summits', summitRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: '1d',
