@@ -571,6 +571,12 @@ function lightboxStep(delta) {
   renderLightbox();
 }
 
+document.getElementById('lightboxModal').addEventListener('click', (e) => {
+  if (e.target.id === 'lightboxModal') {
+    document.getElementById('lightboxModal').classList.add('hidden');
+  }
+});
+
 document.getElementById('lightboxPrev').onclick = () => lightboxStep(-1);
 document.getElementById('lightboxNext').onclick = () => lightboxStep(1);
 document.addEventListener('keydown', (e) => {
