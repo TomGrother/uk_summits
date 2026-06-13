@@ -574,7 +574,17 @@ main {
     justify-content: flex-start;
     flex-wrap: wrap;
   }
-  .auth-area { order: 2; margin-left: auto; }
+  .topbar h1 { flex-basis: 100%; }
+  .auth-area {
+    order: 2;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+  .auth-area .welcome { margin-right: 0; }
   .nav-btn, .auth-area button { padding: 6px 10px; font-size: 0.8rem; }
 
   .nav-dropdown {
