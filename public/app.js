@@ -250,8 +250,6 @@ async function loadAdminPanel() {
       <span>${stats.summits} summits</span>
       <span>${stats.completions} completions</span>
     </div>
-    <button id="adminReseedBtn">Reseed summit data</button>
-    <p class="badge-hint" id="adminReseedMsg"></p>
     <div class="admin-users">
       ${users.map(u => `
         <div class="friend-row">
@@ -264,15 +262,6 @@ async function loadAdminPanel() {
       `).join('')}
     </div>
   `;
-
-  document.getElementById('adminReseedBtn').onclick = async () => {
-    const res = await fetch(`${API}/admin/reseed-auth`, { method: 'POST', headers: authHeaders() });
-    const data = await res.json();
-    document.getElementById('adminReseedMsg').textContent = res.ok
-      ? `Reseeded ${data.count} summits.`
-      : (data.error || 'Reseed failed.');
-    if (res.ok) loadSummits();
-  };
 
   el.querySelectorAll('[data-delete-user]').forEach(btn => {
     btn.onclick = async () => {

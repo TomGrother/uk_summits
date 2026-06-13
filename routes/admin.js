@@ -78,22 +78,4 @@ router.delete('/users/:id', requireAuth, requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// Authenticated reseed for admin users (mirrors the secret-based /reseed above).
-router.post('/reseed-auth', requireAuth, requireAdmin, (req, res) => {
-  const summits = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'seed', 'summits.json'), 'utf8'));
-  const insert = db.prepare(`
-    INSERT INTO summits (name, region, classification, area, height_m, lat, lng)
-    VALUES (@name, @region, @classification, @area, @height_m, @lat, @lng)
-  `);
-
-  const run = db.transaction((rows) => {
-    db.exec('DELETE FROM completions');
-    db.exec('DELETE FROM summits');
-    for (const s of rows) insert.run(s);
-  });
-  run(summits);
-
-  res.json({ ok: true, count: summits.length });
-});
-
 module.exports = router;
