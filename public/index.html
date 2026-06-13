@@ -22,20 +22,28 @@
     <div id="progress" class="progress"></div>
   </main>
 
-  <!-- Friends panel -->
+  <!-- Friends & Badges panel -->
   <div id="friendsModal" class="modal hidden">
     <div class="modal-content friends-content">
       <button class="close-btn" id="closeFriends">&times;</button>
-      <h2>Friends</h2>
+      <h2>Friends &amp; Badges</h2>
 
-      <form id="addFriendForm" class="add-friend-form">
-        <input name="username" placeholder="Friend's username" required />
-        <button type="submit">Add</button>
-      </form>
-      <p class="error" id="friendError"></p>
+      <div class="friends-columns">
+        <div class="friends-column">
+          <form id="addFriendForm" class="add-friend-form">
+            <input name="username" placeholder="Friend's username" required />
+            <button type="submit">Add</button>
+          </form>
+          <p class="error" id="friendError"></p>
 
-      <div id="friendRequests" class="friend-requests"></div>
-      <div id="friendList" class="friend-list"></div>
+          <div id="friendRequests" class="friend-requests"></div>
+          <div id="friendList" class="friend-list"></div>
+        </div>
+
+        <div class="friends-column">
+          <div id="myBadges" class="my-badges"></div>
+        </div>
+      </div>
     </div>
   </div>
 

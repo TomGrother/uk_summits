@@ -1,7 +1,7 @@
 const express = require('express');
 const db = require('../db');
 const { requireAuth } = require('../middleware/auth');
-const { getBadgesForUser } = require('./badges');
+const { getAllBadgesForUser } = require('./badges');
 
 const router = express.Router();
 
@@ -35,7 +35,7 @@ router.get('/progress', requireAuth, (req, res) => {
 
 // Get the logged-in user's earned badges.
 router.get('/badges', requireAuth, (req, res) => {
-  res.json({ badges: getBadgesForUser(req.user.id) });
+  res.json({ badges: getAllBadgesForUser(req.user.id) });
 });
 
 // Mark a summit as completed.

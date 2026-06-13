@@ -167,14 +167,33 @@ async function renderBadges() {
   }
   const res = await fetch(`${API}/summits/badges`, { headers: authHeaders() });
   const data = await res.json();
-  if (!data.badges.length) {
+  const earned = data.badges.filter(b => b.earned);
+  if (!earned.length) {
     el.innerHTML = '<p class="badge-hint">Mark summits as climbed to start earning badges.</p>';
     return;
   }
   el.innerHTML = `
     <h3>Your Badges</h3>
     <div class="badge-icons">
-      ${data.badges.map(b => `<span class="badge" title="${b.label}">${b.icon}</span>`).join('')}
+      ${earned.map(b => `<span class="badge" title="${b.label}">${b.icon}</span>`).join('')}
+    </div>
+  `;
+}
+
+async function loadMyBadges() {
+  const res = await fetch(`${API}/summits/badges`, { headers: authHeaders() });
+  const data = await res.json();
+  const el = document.getElementById('myBadges');
+  el.innerHTML = `
+    <h3>My Badges</h3>
+    <div class="badge-grid">
+      ${data.badges.map(b => `
+        <div class="badge-tile ${b.earned ? 'earned' : 'locked'}" title="${b.label}">
+          <span class="badge-tile-icon">${b.icon}</span>
+          <span class="badge-tile-label">${b.label}</span>
+          <span class="badge-tile-progress">${Math.min(b.progress, b.target)}/${b.target}</span>
+        </div>
+      `).join('')}
     </div>
   `;
 }
@@ -182,6 +201,7 @@ async function renderBadges() {
 function openFriendsModal() {
   document.getElementById('friendsModal').classList.remove('hidden');
   loadFriends();
+  loadMyBadges();
 }
 
 async function loadFriends() {

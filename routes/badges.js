@@ -36,4 +36,41 @@ function getBadgesForUser(userId) {
   return badges;
 }
 
-module.exports = { getBadgesForUser, MILESTONES };
+// Returns every badge that exists (earned or not), each flagged with `earned`
+// and, for milestones, the user's current progress toward the threshold.
+function getAllBadgesForUser(userId) {
+  const total = db.prepare('SELECT COUNT(*) AS c FROM completions WHERE user_id = ?').get(userId).c;
+
+  const milestoneBadges = MILESTONES.map(m => ({
+    id: m.id,
+    label: m.label,
+    icon: m.icon,
+    earned: total >= m.threshold,
+    progress: total,
+    target: m.threshold,
+  }));
+
+  const areaRows = db.prepare(`
+    SELECT s.area AS area, COUNT(*) AS total,
+           SUM(CASE WHEN c.id IS NOT NULL THEN 1 ELSE 0 END) AS completed
+    FROM summits s
+    LEFT JOIN completions c ON c.summit_id = s.id AND c.user_id = ?
+    GROUP BY s.area
+    ORDER BY s.area
+  `).all(userId);
+
+  const areaBadges = areaRows
+    .filter(row => row.area)
+    .map(row => ({
+      id: `region-${row.area}`,
+      label: `${row.area} Complete`,
+      icon: '🎖️',
+      earned: row.total > 0 && row.completed === row.total,
+      progress: row.completed,
+      target: row.total,
+    }));
+
+  return [...milestoneBadges, ...areaBadges];
+}
+
+module.exports = { getBadgesForUser, getAllBadgesForUser, MILESTONES };
