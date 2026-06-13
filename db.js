@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS summits (
   region TEXT NOT NULL,
   classification TEXT,
   area TEXT,
+  wiki TEXT,
   height_m REAL NOT NULL,
   lat REAL NOT NULL,
   lng REAL NOT NULL
@@ -57,6 +58,9 @@ CREATE INDEX IF NOT EXISTS idx_friendships_recipient ON friendships(recipient_id
 const summitColumns = db.prepare("PRAGMA table_info(summits)").all().map(c => c.name);
 if (!summitColumns.includes('area')) {
   db.exec('ALTER TABLE summits ADD COLUMN area TEXT');
+}
+if (!summitColumns.includes('wiki')) {
+  db.exec('ALTER TABLE summits ADD COLUMN wiki TEXT');
 }
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);

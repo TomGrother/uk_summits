@@ -289,6 +289,14 @@ main {
   margin: 0 0 6px;
   font-size: 1.05rem;
 }
+.wiki-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: #2e7d32;
+  text-decoration: none;
+  margin-bottom: 6px;
+}
+.wiki-link:hover { text-decoration: underline; }
 .summit-popup-tags {
   display: flex;
   flex-wrap: wrap;

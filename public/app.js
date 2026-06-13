@@ -401,6 +401,7 @@ function popupHtml(s) {
       <div class="summit-popup-image">${summitImage(s)}</div>
       <div class="summit-popup-body">
         <h3>${s.name}</h3>
+        ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           <span class="tag">${s.region}</span>
