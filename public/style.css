@@ -260,6 +260,30 @@ main {
 }
 .info-content h2 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
 .info-content p { line-height: 1.5; color: var(--text-muted); }
+.admin-modal-content {
+  width: 600px;
+  max-width: 96vw;
+  height: 88vh;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+.admin-modal-content #adminDropdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.admin-modal-content #adminBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.admin-modal-content .admin-users {
+  flex: 1;
+  overflow-y: auto;
+}
 .faq-list dt { font-weight: 700; margin-top: 14px; color: var(--text); }
 .faq-list dd { margin: 4px 0 0; color: var(--text-muted); line-height: 1.45; }
 .sitemap-list { line-height: 1.7; color: var(--text-muted); padding-left: 1.2em; }

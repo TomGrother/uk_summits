@@ -37,7 +37,7 @@ function renderAuthArea() {
       + (currentUser.isAdmin ? `<button class="secondary nav-btn" id="adminBtn">Admin</button>` : '');
     document.getElementById('badgesBtn').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
     if (currentUser.isAdmin) {
-      document.getElementById('adminBtn').onclick = () => toggleDropdown('adminDropdown', loadAdminPanel);
+      document.getElementById('adminBtn').onclick = () => openAdminPanel();
     }
     el.innerHTML = `<span class="welcome">Hi, ${currentUser.username}</span><button class="secondary" id="logoutBtn">Logout</button>`;
     document.getElementById('logoutBtn').onclick = logout;
@@ -50,7 +50,6 @@ function renderAuthArea() {
 
 const DROPDOWNS = {
   badgesDropdown: 'badgesBtn',
-  adminDropdown: 'adminBtn',
 };
 
 function toggleDropdown(id, onOpen) {
@@ -277,6 +276,11 @@ async function loadMyBadges() {
 let adminUsers = [];
 let adminSelectedUserId = null;
 
+function openAdminPanel() {
+  document.getElementById('adminModal').classList.remove('hidden');
+  loadAdminPanel();
+}
+
 async function loadAdminPanel() {
   const [statsRes, usersRes] = await Promise.all([
     fetch(`${API}/admin/stats`, { headers: authHeaders() }),
@@ -293,7 +297,6 @@ async function loadAdminPanel() {
 function renderAdminStats(stats) {
   const el = document.getElementById('adminDropdown');
   el.innerHTML = `
-    <h3>Admin Panel</h3>
     <div class="admin-stats">
       <span>${stats.users} users</span>
       <span>${stats.summits} summits</span>
