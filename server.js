@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const summitRoutes = require('./routes/summits');
 const adminRoutes = require('./routes/admin');
 const imageRoutes = require('./routes/images');
+const reviewRoutes = require('./routes/reviews');
 
 // Populate the summits table on first run (no-op if already seeded).
 (function seedIfEmpty() {
@@ -50,6 +51,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/summits', summitRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/summits', imageRoutes);
+app.use('/api/summits', reviewRoutes);
 
 const dataDir = process.env.DATA_DIR || __dirname;
 app.use('/uploads', express.static(path.join(dataDir, 'uploads'), { maxAge: '7d' }));

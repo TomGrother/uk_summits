@@ -378,8 +378,6 @@ function popupHtml(s) {
       <div class="summit-popup-body">
         <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
         ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-        ${s.wiki ? `<button class="describe-btn" data-describe="${s.id}">📖 Brief description</button>
-        <div class="summit-description hidden" data-description="${s.id}"></div>` : ''}
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           <span class="tag">${s.region}</span>
@@ -399,19 +397,24 @@ function popupHtml(s) {
             <input type="file" accept="image/*" data-upload="${s.id}" hidden />
           </label>
         ` : ''}
+        <div class="summit-reviews" data-reviews="${s.id}">
+          <p class="reviews-loading">Loading reviews&hellip;</p>
+        </div>
       </div>
     </div>
   `;
+}
+
+function starString(rating) {
+  return '★★★★★☆☆☆☆☆'.slice(5 - rating, 10 - rating);
 }
 
 function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
 
-  const describeBtn = document.querySelector(`[data-describe="${s.id}"]`);
-  if (describeBtn) describeBtn.onclick = () => loadDescription(s);
-
   loadGallery(s.id);
+  loadReviews(s.id);
 
   const fileInput = document.querySelector(`[data-upload="${s.id}"]`);
   if (fileInput) {
@@ -433,41 +436,6 @@ function bindPopupActions(s, marker) {
       }
       fileInput.value = '';
     };
-  }
-}
-
-const descriptionCache = new Map();
-
-async function loadDescription(s) {
-  const el = document.querySelector(`[data-description="${s.id}"]`);
-  const btn = document.querySelector(`[data-describe="${s.id}"]`);
-  if (!el) return;
-
-  if (!el.classList.contains('hidden')) {
-    el.classList.add('hidden');
-    return;
-  }
-
-  el.classList.remove('hidden');
-
-  if (descriptionCache.has(s.id)) {
-    el.textContent = descriptionCache.get(s.id);
-    return;
-  }
-
-  el.textContent = 'Loading summary…';
-  if (btn) btn.disabled = true;
-  try {
-    const title = s.wiki.split('/wiki/')[1];
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
-    const data = await res.json();
-    const text = data.extract || 'No description available.';
-    descriptionCache.set(s.id, text);
-    el.textContent = text;
-  } catch (e) {
-    el.textContent = 'Could not load description.';
-  } finally {
-    if (btn) btn.disabled = false;
   }
 }
 
@@ -504,6 +472,73 @@ async function loadGallery(summitId) {
   const viewAllBtn = el.querySelector('.gallery-view-all');
   if (viewAllBtn) {
     viewAllBtn.onclick = () => openFullGallery(data.images);
+  }
+}
+
+async function loadReviews(summitId) {
+  const el = document.querySelector(`[data-reviews="${summitId}"]`);
+  if (!el) return;
+  const res = await fetch(`${API}/summits/${summitId}/reviews`);
+  const data = await res.json();
+  if (!el.isConnected) return;
+
+  const reviews = data.reviews || [];
+  const myReview = currentUser ? reviews.find(r => r.username === currentUser.username) : null;
+  const others = reviews.filter(r => r !== myReview);
+
+  const avg = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
+
+  el.innerHTML = `
+    <h4 class="reviews-heading">
+      Reviews ${avg ? `<span class="reviews-avg">${starString(Math.round(avg))} ${avg} (${reviews.length})</span>` : ''}
+    </h4>
+    ${currentUser ? `
+      <form class="review-form" data-review-form="${summitId}">
+        <select name="rating">
+          ${[5, 4, 3, 2, 1].map(n => `<option value="${n}" ${myReview && myReview.rating === n ? 'selected' : ''}>${starString(n)}</option>`).join('')}
+        </select>
+        <textarea name="body" placeholder="Share your thoughts on this summit..." maxlength="1000">${myReview ? myReview.body : ''}</textarea>
+        <div class="review-form-actions">
+          <button type="submit" class="popup-btn">${myReview ? 'Update review' : 'Post review'}</button>
+          ${myReview ? '<button type="button" class="review-delete-btn" data-delete-review>Delete</button>' : ''}
+        </div>
+      </form>
+    ` : ''}
+    <div class="review-list">
+      ${others.length ? others.map(r => `
+        <div class="review-row">
+          <div class="review-row-head">
+            <span class="review-stars">${starString(r.rating)}</span>
+            <span class="review-author">${r.username}</span>
+          </div>
+          ${r.body ? `<p class="review-body">${r.body}</p>` : ''}
+        </div>
+      `).join('') : '<p class="reviews-empty">No reviews yet &mdash; be the first to share your experience!</p>'}
+    </div>
+  `;
+
+  const form = el.querySelector('[data-review-form]');
+  if (form) {
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      await fetch(`${API}/summits/${summitId}/reviews`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: Number(formData.get('rating')), body: formData.get('body') }),
+      });
+      loadReviews(summitId);
+    };
+  }
+
+  const deleteBtn = el.querySelector('[data-delete-review]');
+  if (deleteBtn) {
+    deleteBtn.onclick = async () => {
+      await fetch(`${API}/summits/${summitId}/reviews`, { method: 'DELETE', headers: authHeaders() });
+      loadReviews(summitId);
+    };
   }
 }
 
