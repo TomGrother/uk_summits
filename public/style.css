@@ -25,6 +25,15 @@ body {
   background: var(--bg);
 }
 
+.beta-banner {
+  background: var(--warn);
+  color: #1a1a1a;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -120,7 +129,7 @@ body {
 
 main {
   position: relative;
-  height: calc(100vh - 54px - 36px);
+  height: calc(100vh - 54px - 36px - 30px);
   display: flex;
 }
 
@@ -582,8 +591,10 @@ main {
 
   main {
     flex-direction: column;
-    height: calc(100vh - 70px - 56px);
+    height: calc(100vh - 70px - 56px - 40px);
   }
+
+  .beta-banner { font-size: 0.72rem; padding: 6px 8px; }
 
   .sidebar {
     width: 100%;
