@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="topbar">
-    <h1>UK Summits</h1>
+    <h1>UK Summits <span class="beta-tag" title="This site is in beta — features may change and you may encounter bugs.">BETA</span></h1>
     <nav id="navArea" class="nav-area"></nav>
     <div id="authArea" class="auth-area"></div>
   </header>
@@ -25,6 +25,86 @@
     <div id="map"></div>
     <div id="progress" class="progress"></div>
   </main>
+
+  <footer class="site-footer">
+    <span class="footer-beta">UK Summits is currently in <strong>beta</strong> &mdash; thanks for testing it out!</span>
+    <nav class="footer-links">
+      <button id="footerAbout">About Us</button>
+      <button id="footerFaq">FAQ</button>
+      <button id="footerSitemap">Site Map</button>
+    </nav>
+  </footer>
+
+  <!-- About Us modal -->
+  <div id="aboutModal" class="modal hidden">
+    <div class="modal-content info-content">
+      <button class="close-btn" data-close-modal="aboutModal">&times;</button>
+      <h2>About Us <span class="beta-tag">BETA</span></h2>
+      <p>UK Summits is a small, independent project built to help hillwalkers track their progress
+        on the Welsh Nuttalls &mdash; the 189 mountains in Wales over 2,000ft. We're hikers ourselves,
+        and built this because we wanted a simple, free way to log climbs, see them on a map, and
+        compare notes with friends.</p>
+      <p>The site is currently in <strong>beta</strong>, which means it's still under active
+        development. Expect new features, occasional bugs, and changes as we improve things based
+        on feedback. If something looks wrong or you have an idea, please let us know!</p>
+    </div>
+  </div>
+
+  <!-- FAQ modal -->
+  <div id="faqModal" class="modal hidden">
+    <div class="modal-content info-content">
+      <button class="close-btn" data-close-modal="faqModal">&times;</button>
+      <h2>FAQ <span class="beta-tag">BETA</span></h2>
+      <dl class="faq-list">
+        <dt>What is a Nuttall?</dt>
+        <dd>A Nuttall is a mountain in England or Wales over 2,000ft (610m) with a drop of at least
+          15m on all sides. This site tracks the 189 Nuttalls in Wales.</dd>
+
+        <dt>Do I need an account?</dt>
+        <dd>Yes &mdash; a free account is required to use the map and track which summits you've
+          climbed. Registration just needs a username, email and password.</dd>
+
+        <dt>How do I mark a summit as climbed?</dt>
+        <dd>Click a summit marker on the map or a summit in the sidebar list, then use the
+          "Mark as climbed" button in the popup, or tick the checkbox next to its name in the
+          sidebar.</dd>
+
+        <dt>How do I find a specific summit?</dt>
+        <dd>Use the search box at the top of the sidebar to filter summits by name. Matching
+          summits' regions will expand automatically.</dd>
+
+        <dt>What are badges?</dt>
+        <dd>Badges are awarded for milestones (e.g. your first summit, 10, 25, 50, 100 and all 189)
+          and for completing every summit in a region. View yours from the Badges menu.</dd>
+
+        <dt>Can I see my friends' progress?</dt>
+        <dd>Yes. Use the Friends menu to search for other users by username, send a friend
+          request, and once accepted you'll see their progress and badges.</dd>
+
+        <dt>The site is in beta &mdash; what does that mean?</dt>
+        <dd>It means we're still actively building and refining UK Summits. Some features may
+          change, and you might spot the occasional bug. Thanks for bearing with us!</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Site Map modal -->
+  <div id="sitemapModal" class="modal hidden">
+    <div class="modal-content info-content">
+      <button class="close-btn" data-close-modal="sitemapModal">&times;</button>
+      <h2>Site Map</h2>
+      <ul class="sitemap-list">
+        <li><strong>Map</strong> &mdash; interactive map of all 189 Welsh Nuttalls</li>
+        <li><strong>Sidebar &rsaquo; Search</strong> &mdash; find a summit by name</li>
+        <li><strong>Sidebar &rsaquo; Regions</strong> &mdash; browse summits grouped by area, zoom to region</li>
+        <li><strong>Badges</strong> &mdash; view your earned and locked achievements</li>
+        <li><strong>Friends</strong> &mdash; manage friend requests and view friends' progress</li>
+        <li><strong>Account</strong> &mdash; login / register / logout</li>
+        <li><strong>About Us</strong> &mdash; information about this project</li>
+        <li><strong>FAQ</strong> &mdash; frequently asked questions</li>
+      </ul>
+    </div>
+  </div>
 
   <!-- Friends dropdown -->
   <div id="friendsDropdown" class="nav-dropdown hidden">

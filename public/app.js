@@ -182,6 +182,13 @@ function renderRegionList() {
   });
 }
 
+document.getElementById('footerAbout').onclick = () => document.getElementById('aboutModal').classList.remove('hidden');
+document.getElementById('footerFaq').onclick = () => document.getElementById('faqModal').classList.remove('hidden');
+document.getElementById('footerSitemap').onclick = () => document.getElementById('sitemapModal').classList.remove('hidden');
+document.querySelectorAll('[data-close-modal]').forEach(btn => {
+  btn.onclick = () => document.getElementById(btn.dataset.closeModal).classList.add('hidden');
+});
+
 document.getElementById('summitSearch').oninput = (e) => {
   summitSearchTerm = e.target.value;
   renderRegionList();

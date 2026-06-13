@@ -13,7 +13,19 @@ body {
   background: #1b3a2b;
   color: #fff;
 }
-.topbar h1 { margin: 0; font-size: 1.25rem; }
+.topbar h1 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px; }
+
+.beta-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: #f9a825;
+  color: #1a1a1a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  vertical-align: middle;
+}
 
 .auth-area button {
   background: #4caf50;
@@ -65,9 +77,46 @@ body {
 
 main {
   position: relative;
-  height: calc(100vh - 54px);
+  height: calc(100vh - 54px - 36px);
   display: flex;
 }
+
+.site-footer {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  background: #1b3a2b;
+  color: #cfe3d4;
+  font-size: 0.78rem;
+}
+.footer-beta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.footer-links { display: flex; gap: 4px; flex-shrink: 0; }
+.footer-links button {
+  background: transparent;
+  border: none;
+  color: #cfe3d4;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.footer-links button:hover { color: #fff; }
+
+.info-content {
+  width: 520px;
+  max-width: 92vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: left;
+}
+.info-content h2 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
+.info-content p { line-height: 1.5; color: #444; }
+.faq-list dt { font-weight: 600; margin-top: 14px; }
+.faq-list dd { margin: 4px 0 0; color: #555; line-height: 1.45; }
+.sitemap-list { line-height: 1.7; color: #444; padding-left: 1.2em; }
 #map { flex: 1; height: 100%; }
 
 .sidebar {
