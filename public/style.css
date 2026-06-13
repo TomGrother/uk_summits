@@ -425,6 +425,45 @@ main {
 .welcome-feature strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
 .welcome-feature p { margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; }
 
+.welcome-preview {
+  margin: 16px 24px;
+  text-align: center;
+}
+.welcome-preview-label {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.preview-popup {
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  max-width: 280px;
+  margin: 0 auto;
+}
+.preview-popup .popup-btn,
+.preview-popup .popup-upload-btn,
+.preview-popup .wiki-link { pointer-events: none; }
+.preview-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  font-size: 1.3rem;
+  background: var(--bg);
+  border-radius: 6px;
+}
+.welcome-preview-caption {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .welcome-content .welcome-actions {
   margin-left: 24px;
   margin-right: 24px;
@@ -757,5 +796,6 @@ main {
   .nav-area, .auth-area { min-width: 0; }
   .welcome-features { margin: 16px; }
   .welcome-intro { margin: 18px 16px 4px; }
+  .welcome-preview { margin: 16px; }
   .welcome-content .welcome-actions { margin-left: 16px; margin-right: 16px; }
 }
