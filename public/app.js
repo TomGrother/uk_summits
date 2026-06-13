@@ -188,6 +188,36 @@ function renderRegionList() {
   });
 }
 
+let locationMarker = null;
+document.getElementById('locateBtn').onclick = () => {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+  const btn = document.getElementById('locateBtn');
+  btn.classList.add('locating');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      btn.classList.remove('locating');
+      const { latitude, longitude } = pos.coords;
+      if (locationMarker) map.removeLayer(locationMarker);
+      locationMarker = L.circleMarker([latitude, longitude], {
+        radius: 8,
+        color: '#fff',
+        weight: 2,
+        fillColor: '#1a73e8',
+        fillOpacity: 1,
+      }).addTo(map);
+      map.setView([latitude, longitude], Math.max(map.getZoom(), 12));
+    },
+    () => {
+      btn.classList.remove('locating');
+      alert('Unable to retrieve your location. Please check location permissions.');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+};
+
 document.getElementById('sidebarToggle').onclick = () => {
   document.getElementById('sidebar').classList.toggle('open');
 };
