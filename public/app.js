@@ -274,15 +274,24 @@ async function loadMyBadges() {
   `;
 }
 
+let adminUsers = [];
+let adminSelectedUserId = null;
+
 async function loadAdminPanel() {
-  const el = document.getElementById('adminDropdown');
   const [statsRes, usersRes] = await Promise.all([
     fetch(`${API}/admin/stats`, { headers: authHeaders() }),
     fetch(`${API}/admin/users`, { headers: authHeaders() }),
   ]);
   const stats = await statsRes.json();
-  const { users } = await usersRes.json();
+  ({ users: adminUsers } = await usersRes.json());
+  adminSelectedUserId = null;
 
+  renderAdminStats(stats);
+  renderAdminUserList('');
+}
+
+function renderAdminStats(stats) {
+  const el = document.getElementById('adminDropdown');
   el.innerHTML = `
     <h3>Admin Panel</h3>
     <div class="admin-stats">
@@ -290,75 +299,105 @@ async function loadAdminPanel() {
       <span>${stats.summits} summits</span>
       <span>${stats.completions} completions</span>
     </div>
+    <div id="adminBody"></div>
+  `;
+}
+
+function renderAdminUserList(filter) {
+  const body = document.getElementById('adminBody');
+  const term = filter.trim().toLowerCase();
+  const filtered = term
+    ? adminUsers.filter(u => u.username.toLowerCase().includes(term) || u.email.toLowerCase().includes(term))
+    : adminUsers;
+
+  body.innerHTML = `
+    <div class="admin-search">
+      <input type="text" id="adminUserSearch" placeholder="Search users..." value="${filter}" />
+    </div>
     <div class="admin-users">
-      ${users.map(u => `
-        <div class="admin-user" data-user="${u.id}">
-          <div class="admin-user-head">
-            <span class="admin-user-name">${u.username}${u.isAdmin ? ' 👑' : ''}</span>
-            <span class="admin-user-progress">${u.completed} climbed</span>
-            <button class="link-btn" data-toggle-edit="${u.id}">Edit</button>
-            ${!u.isAdmin ? `<button class="secondary" data-delete-user="${u.id}">Delete</button>` : ''}
-          </div>
-          <div class="admin-user-edit hidden" data-edit="${u.id}">
-            <label>Username
-              <input type="text" name="username" value="${u.username}" />
-            </label>
-            <label>Email
-              <input type="email" name="email" value="${u.email}" />
-            </label>
-            <label class="admin-checkbox">
-              <input type="checkbox" name="isAdmin" ${u.isAdmin ? 'checked' : ''} ${u.id === currentUser.id ? 'disabled' : ''} />
-              Admin
-            </label>
-            <label>New password <span class="hint-inline">(leave blank to keep current)</span>
-              <input type="password" name="password" placeholder="••••••••" />
-            </label>
-            <p class="error" data-error="${u.id}"></p>
-            <button type="button" class="popup-btn" data-save-user="${u.id}">Save changes</button>
-          </div>
-        </div>
-      `).join('')}
+      ${filtered.length ? filtered.map(u => `
+        <button class="admin-user-row" data-select-user="${u.id}">
+          <span class="admin-user-name">${u.username}${u.isAdmin ? ' 👑' : ''}</span>
+          <span class="admin-user-progress">${u.completed} climbed</span>
+        </button>
+      `).join('') : '<p class="search-empty">No users found.</p>'}
     </div>
   `;
 
-  el.querySelectorAll('[data-toggle-edit]').forEach(btn => {
+  const search = document.getElementById('adminUserSearch');
+  search.focus();
+  search.setSelectionRange(filter.length, filter.length);
+  search.oninput = () => renderAdminUserList(search.value);
+
+  body.querySelectorAll('[data-select-user]').forEach(btn => {
     btn.onclick = () => {
-      document.querySelector(`[data-edit="${btn.dataset.toggleEdit}"]`).classList.toggle('hidden');
+      adminSelectedUserId = Number(btn.dataset.selectUser);
+      renderAdminUserEdit();
     };
   });
+}
 
-  el.querySelectorAll('[data-save-user]').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.dataset.saveUser;
-      const editEl = document.querySelector(`[data-edit="${id}"]`);
-      const errEl = document.querySelector(`[data-error="${id}"]`);
-      const payload = {
-        username: editEl.querySelector('[name="username"]').value.trim(),
-        email: editEl.querySelector('[name="email"]').value.trim(),
-        isAdmin: editEl.querySelector('[name="isAdmin"]').checked,
-      };
-      const password = editEl.querySelector('[name="password"]').value;
-      if (password) payload.password = password;
+function renderAdminUserEdit() {
+  const body = document.getElementById('adminBody');
+  const u = adminUsers.find(x => x.id === adminSelectedUserId);
+  if (!u) return;
 
-      const res = await fetch(`${API}/admin/users/${id}`, {
-        method: 'PATCH',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) { errEl.textContent = data.error; return; }
-      errEl.textContent = '';
-      loadAdminPanel();
+  body.innerHTML = `
+    <button class="link-btn admin-back-btn" data-back>&larr; Back to users</button>
+    <div class="admin-user-edit" data-edit="${u.id}">
+      <label>Username
+        <input type="text" name="username" value="${u.username}" />
+      </label>
+      <label>Email
+        <input type="email" name="email" value="${u.email}" />
+      </label>
+      <label class="admin-checkbox">
+        <input type="checkbox" name="isAdmin" ${u.isAdmin ? 'checked' : ''} ${u.id === currentUser.id ? 'disabled' : ''} />
+        Admin
+      </label>
+      <label>New password <span class="hint-inline">(leave blank to keep current)</span>
+        <input type="password" name="password" placeholder="••••••••" />
+      </label>
+      <p class="error" data-error="${u.id}"></p>
+      <div class="admin-edit-actions">
+        <button type="button" class="popup-btn" data-save-user="${u.id}">Save changes</button>
+        ${!u.isAdmin ? `<button class="secondary" data-delete-user="${u.id}">Delete user</button>` : ''}
+      </div>
+    </div>
+  `;
+
+  body.querySelector('[data-back]').onclick = () => renderAdminUserList('');
+
+  body.querySelector('[data-save-user]').onclick = async () => {
+    const editEl = body.querySelector(`[data-edit="${u.id}"]`);
+    const errEl = body.querySelector(`[data-error="${u.id}"]`);
+    const payload = {
+      username: editEl.querySelector('[name="username"]').value.trim(),
+      email: editEl.querySelector('[name="email"]').value.trim(),
+      isAdmin: editEl.querySelector('[name="isAdmin"]').checked,
     };
-  });
+    const password = editEl.querySelector('[name="password"]').value;
+    if (password) payload.password = password;
 
-  el.querySelectorAll('[data-delete-user]').forEach(btn => {
-    btn.onclick = async () => {
+    const res = await fetch(`${API}/admin/users/${u.id}`, {
+      method: 'PATCH',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error; return; }
+    errEl.textContent = '';
+    await loadAdminPanel();
+  };
+
+  const deleteBtn = body.querySelector('[data-delete-user]');
+  if (deleteBtn) {
+    deleteBtn.onclick = async () => {
       if (!confirm('Delete this user?')) return;
-      await fetch(`${API}/admin/users/${btn.dataset.deleteUser}`, { method: 'DELETE', headers: authHeaders() });
-      loadAdminPanel();
+      await fetch(`${API}/admin/users/${u.id}`, { method: 'DELETE', headers: authHeaders() });
+      await loadAdminPanel();
     };
-  });
+  }
 }
 
 async function renderProgress() {
