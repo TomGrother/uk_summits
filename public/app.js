@@ -82,19 +82,11 @@ function renderWelcomeGate() {
     gate.classList.add('hidden');
     return;
   }
-  if (sessionStorage.getItem('exploreOnly')) {
-    gate.classList.add('hidden');
-    return;
-  }
   gate.classList.remove('hidden');
 }
 
 document.getElementById('welcomeRegister').onclick = () => openAuthModal('register');
 document.getElementById('welcomeLogin').onclick = () => openAuthModal('login');
-document.getElementById('welcomeExplore').onclick = () => {
-  sessionStorage.setItem('exploreOnly', '1');
-  document.getElementById('welcomeGate').classList.add('hidden');
-};
 
 function logout() {
   token = null;
