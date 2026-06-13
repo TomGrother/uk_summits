@@ -138,6 +138,16 @@ main {
 .friend-info { display: flex; justify-content: space-between; font-weight: 600; }
 .friend-progress { font-weight: 400; color: #666; font-size: 0.85rem; }
 
+.summit-search { padding: 10px 14px; background: #fff; border-bottom: 1px solid #ddd; }
+.summit-search input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.search-empty { padding: 14px; color: #888; font-size: 0.9rem; }
+
 .region-group { border-bottom: 1px solid #e0e0e0; }
 .region-header {
   display: flex;

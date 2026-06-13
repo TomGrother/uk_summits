@@ -109,11 +109,16 @@ async function loadSummits() {
 }
 
 const openRegions = new Set();
+let summitSearchTerm = '';
 
 function renderRegionList() {
   const el = document.getElementById('regionList');
+  const term = summitSearchTerm.trim().toLowerCase();
+  const searching = term.length > 0;
+
   const groups = new Map();
   summits.forEach(s => {
+    if (searching && !s.name.toLowerCase().includes(term)) return;
     const area = s.area || 'Other';
     if (!groups.has(area)) groups.set(area, []);
     groups.get(area).push(s);
@@ -121,10 +126,15 @@ function renderRegionList() {
 
   const sortedAreas = [...groups.keys()].sort();
 
+  if (searching && sortedAreas.length === 0) {
+    el.innerHTML = '<p class="search-empty">No summits match your search.</p>';
+    return;
+  }
+
   el.innerHTML = sortedAreas.map(area => {
     const list = groups.get(area).sort((a, b) => b.height_m - a.height_m);
     const completed = list.filter(s => s.completed).length;
-    const isOpen = openRegions.has(area);
+    const isOpen = searching || openRegions.has(area);
     return `
       <div class="region-group">
         <div class="region-header" data-area="${area}">
@@ -171,6 +181,11 @@ function renderRegionList() {
     row.querySelector('.summit-name').onclick = () => focusSummit(id);
   });
 }
+
+document.getElementById('summitSearch').oninput = (e) => {
+  summitSearchTerm = e.target.value;
+  renderRegionList();
+};
 
 function zoomToRegion(area) {
   const list = summits.filter(s => s.area === area);
