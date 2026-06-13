@@ -406,16 +406,40 @@ main {
 .welcome-content h2 { margin: 0; font-weight: 800; }
 
 .welcome-hero {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-dark) 100%);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.18), transparent 40%),
+    radial-gradient(circle at 85% 0%, rgba(255,255,255,0.12), transparent 45%),
+    linear-gradient(135deg, var(--primary) 0%, var(--accent-dark) 60%, var(--accent) 100%);
   color: #fff;
-  padding: 28px 24px 22px;
+  padding: 36px 24px 28px;
   border-radius: var(--radius) var(--radius) 0 0;
+  text-align: center;
 }
-.welcome-hero-emoji { font-size: 2.4rem; margin-bottom: 4px; }
+.welcome-hero-emoji {
+  font-size: 2.8rem;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+}
+.welcome-wordmark {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.welcome-wordmark span {
+  background: linear-gradient(135deg, #d7ead9, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 .welcome-tagline {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   font-size: 0.95rem;
   color: #d7ead9;
+  font-weight: 500;
 }
 
 .welcome-intro {
