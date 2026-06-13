@@ -105,7 +105,6 @@ async function loadSummits() {
   renderMarkers();
   renderProgress();
   renderRegionList();
-  renderBadges();
 }
 
 const openRegions = new Set();
@@ -215,27 +214,6 @@ function focusSummit(id) {
     document.getElementById('sidebar').classList.remove('open');
     setTimeout(() => map.invalidateSize(), 250);
   }
-}
-
-async function renderBadges() {
-  const el = document.getElementById('badgeStrip');
-  if (!currentUser) {
-    el.innerHTML = '';
-    return;
-  }
-  const res = await fetch(`${API}/summits/badges`, { headers: authHeaders() });
-  const data = await res.json();
-  const earned = data.badges.filter(b => b.earned);
-  if (!earned.length) {
-    el.innerHTML = '<p class="badge-hint">Mark summits as climbed to start earning badges.</p>';
-    return;
-  }
-  el.innerHTML = `
-    <h3>Your Badges</h3>
-    <div class="badge-icons">
-      ${earned.map(b => `<span class="badge" title="${b.label}">${b.icon}</span>`).join('')}
-    </div>
-  `;
 }
 
 async function loadMyBadges() {
@@ -458,7 +436,6 @@ async function toggleCompletion(id) {
   renderMarkers();
   renderProgress();
   renderRegionList();
-  renderBadges();
 
   const m = markers.get(id);
   if (m) m.openPopup();
