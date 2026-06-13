@@ -50,6 +50,15 @@ CREATE TABLE IF NOT EXISTS friendships (
   UNIQUE(requester_id, recipient_id)
 );
 
+CREATE TABLE IF NOT EXISTS summit_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  summit_id INTEGER NOT NULL REFERENCES summits(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  filename TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_summit_images_summit ON summit_images(summit_id);
 CREATE INDEX IF NOT EXISTS idx_summits_region ON summits(region);
 CREATE INDEX IF NOT EXISTS idx_completions_user ON completions(user_id);
 CREATE INDEX IF NOT EXISTS idx_friendships_requester ON friendships(requester_id);

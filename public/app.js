@@ -412,6 +412,15 @@ function popupHtml(s) {
                ${s.completed ? '✓ Climbed' : 'Mark as climbed'}
              </button>`
           : '<p class="popup-hint">Login to track this summit</p>'}
+        <div class="summit-gallery" data-gallery="${s.id}">
+          <p class="gallery-loading">Loading photos&hellip;</p>
+        </div>
+        ${currentUser ? `
+          <label class="popup-upload-btn">
+            📷 Add a photo
+            <input type="file" accept="image/*" data-upload="${s.id}" hidden />
+          </label>
+        ` : ''}
       </div>
     </div>
   `;
@@ -420,6 +429,63 @@ function popupHtml(s) {
 function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
+
+  loadGallery(s.id);
+
+  const fileInput = document.querySelector(`[data-upload="${s.id}"]`);
+  if (fileInput) {
+    fileInput.onchange = async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`${API}/summits/${s.id}/images`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: formData,
+      });
+      if (res.ok) {
+        loadGallery(s.id);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Upload failed');
+      }
+      fileInput.value = '';
+    };
+  }
+}
+
+async function loadGallery(summitId) {
+  const el = document.querySelector(`[data-gallery="${summitId}"]`);
+  if (!el) return;
+  const res = await fetch(`${API}/summits/${summitId}/images`, { headers: authHeaders() });
+  const data = await res.json();
+  if (!el.isConnected) return;
+
+  if (!data.images.length) {
+    el.innerHTML = '<p class="gallery-empty">No photos yet &mdash; be the first to add one!</p>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="gallery-grid">
+      ${data.images.map(img => `
+        <button class="gallery-thumb" data-lightbox-src="${img.url}" data-lightbox-by="${img.username}" title="By ${img.username}">
+          <img src="${img.url}" alt="Photo by ${img.username}" loading="lazy" />
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  el.querySelectorAll('.gallery-thumb').forEach(btn => {
+    btn.onclick = () => openLightbox(btn.dataset.lightboxSrc, btn.dataset.lightboxBy);
+  });
+}
+
+function openLightbox(src, username) {
+  document.getElementById('lightboxImage').src = src;
+  document.getElementById('lightboxCaption').textContent = `Photo by ${username}`;
+  document.getElementById('lightboxModal').classList.remove('hidden');
 }
 
 async function toggleCompletion(id) {
