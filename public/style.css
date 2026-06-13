@@ -269,13 +269,12 @@ main {
 .welcome-feature strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
 .welcome-feature p { margin: 0; font-size: 0.78rem; color: #666; line-height: 1.35; }
 
-.welcome-content .welcome-actions,
-.welcome-content .welcome-explore {
+.welcome-content .welcome-actions {
   margin-left: 24px;
   margin-right: 24px;
+  margin-bottom: 24px;
   width: auto;
 }
-.welcome-content .welcome-explore { margin-bottom: 20px; }
 .welcome-list {
   text-align: left;
   margin: 16px 0;
