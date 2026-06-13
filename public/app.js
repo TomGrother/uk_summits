@@ -378,6 +378,8 @@ function popupHtml(s) {
       <div class="summit-popup-body">
         <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
         ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
+        ${s.wiki ? `<button class="describe-btn" data-describe="${s.id}">📖 Brief description</button>
+        <div class="summit-description hidden" data-description="${s.id}"></div>` : ''}
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           <span class="tag">${s.region}</span>
@@ -406,6 +408,9 @@ function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
 
+  const describeBtn = document.querySelector(`[data-describe="${s.id}"]`);
+  if (describeBtn) describeBtn.onclick = () => loadDescription(s);
+
   loadGallery(s.id);
 
   const fileInput = document.querySelector(`[data-upload="${s.id}"]`);
@@ -428,6 +433,41 @@ function bindPopupActions(s, marker) {
       }
       fileInput.value = '';
     };
+  }
+}
+
+const descriptionCache = new Map();
+
+async function loadDescription(s) {
+  const el = document.querySelector(`[data-description="${s.id}"]`);
+  const btn = document.querySelector(`[data-describe="${s.id}"]`);
+  if (!el) return;
+
+  if (!el.classList.contains('hidden')) {
+    el.classList.add('hidden');
+    return;
+  }
+
+  el.classList.remove('hidden');
+
+  if (descriptionCache.has(s.id)) {
+    el.textContent = descriptionCache.get(s.id);
+    return;
+  }
+
+  el.textContent = 'Loading summary…';
+  if (btn) btn.disabled = true;
+  try {
+    const title = s.wiki.split('/wiki/')[1];
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`);
+    const data = await res.json();
+    const text = data.extract || 'No description available.';
+    descriptionCache.set(s.id, text);
+    el.textContent = text;
+  } catch (e) {
+    el.textContent = 'Could not load description.';
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
