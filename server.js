@@ -3,14 +3,28 @@ const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
 const path = require('path');
+const fs = require('fs');
+const db = require('./db');
 
 const authRoutes = require('./routes/auth');
 const summitRoutes = require('./routes/summits');
-const { seed } = require('./data/seed');
 
 // Populate the summits table on first run (no-op if already seeded).
-const seedResult = seed();
-if (seedResult.seeded) console.log(`Seeded ${seedResult.count} summits`);
+(function seedIfEmpty() {
+  const existing = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
+  if (existing > 0) return;
+
+  const summits = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'summits.json'), 'utf8'));
+  const insert = db.prepare(`
+    INSERT INTO summits (name, region, classification, height_m, lat, lng)
+    VALUES (@name, @region, @classification, @height_m, @lat, @lng)
+  `);
+  const run = db.transaction((rows) => {
+    for (const s of rows) insert.run(s);
+  });
+  run(summits);
+  console.log(`Seeded ${summits.length} summits`);
+})();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
