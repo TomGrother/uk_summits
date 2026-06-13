@@ -55,11 +55,23 @@ async function renderProgress() {
   el.textContent = `${data.completed} / ${data.total} summits completed`;
 }
 
+// Minimum summit height (m) to show at each zoom level, so the map
+// starts with just the major peaks and reveals smaller ones as you zoom in.
+function heightThresholdForZoom(zoom) {
+  if (zoom < 7) return 1000;
+  if (zoom < 8) return 800;
+  if (zoom < 9) return 600;
+  if (zoom < 10) return 400;
+  return 0;
+}
+
 function renderMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers.clear();
 
-  summits.forEach(s => {
+  const minHeight = heightThresholdForZoom(map.getZoom());
+
+  summits.filter(s => s.height_m >= minHeight).forEach(s => {
     const color = s.completed ? '#2e7d32' : '#d32f2f';
     const marker = L.circleMarker([s.lat, s.lng], {
       radius: 6,
@@ -137,6 +149,8 @@ function renderList() {
       ul.appendChild(li);
     });
 }
+
+map.on('zoomend', renderMarkers);
 
 document.getElementById('search').addEventListener('input', renderList);
 document.getElementById('regionFilter').addEventListener('change', renderList);
