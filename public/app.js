@@ -182,6 +182,10 @@ function renderRegionList() {
   });
 }
 
+document.getElementById('sidebarToggle').onclick = () => {
+  document.getElementById('sidebar').classList.toggle('open');
+};
+
 document.getElementById('footerAbout').onclick = () => document.getElementById('aboutModal').classList.remove('hidden');
 document.getElementById('footerFaq').onclick = () => document.getElementById('faqModal').classList.remove('hidden');
 document.getElementById('footerSitemap').onclick = () => document.getElementById('sitemapModal').classList.remove('hidden');
@@ -207,6 +211,10 @@ function focusSummit(id) {
   if (!summit || !marker) return;
   map.setView([summit.lat, summit.lng], Math.max(map.getZoom(), 12));
   marker.openPopup();
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('open');
+    setTimeout(() => map.invalidateSize(), 250);
+  }
 }
 
 async function renderBadges() {
