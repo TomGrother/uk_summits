@@ -124,7 +124,7 @@ body {
   position: absolute;
   top: 58px;
   right: 16px;
-  z-index: 900;
+  z-index: 960;
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
@@ -144,7 +144,67 @@ body {
   color: var(--text-muted);
   margin-bottom: 12px;
 }
-.admin-users { margin-top: 8px; }
+.admin-users { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.admin-user {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+.admin-user-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.admin-user-name { font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-user-progress { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
+.link-btn {
+  background: none; border: none; color: var(--accent-dark); font-weight: 600;
+  font-size: 0.8rem; cursor: pointer; padding: 4px 6px;
+}
+.link-btn:hover { text-decoration: underline; }
+.admin-user .secondary {
+  background: transparent; border: 1px solid var(--danger); color: var(--danger);
+  border-radius: 999px; padding: 4px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+}
+.admin-user .secondary:hover { background: rgba(214,69,69,0.08); }
+.admin-user-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.admin-user-edit.hidden { display: none; }
+.admin-user-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.admin-user-edit label.admin-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.admin-user-edit input[type="text"],
+.admin-user-edit input[type="email"],
+.admin-user-edit input[type="password"] {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+.admin-user-edit input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+.hint-inline { font-weight: 400; text-transform: none; }
+.admin-user-edit .popup-btn { width: auto; padding: 8px 16px; align-self: flex-start; }
 
 main {
   position: relative;

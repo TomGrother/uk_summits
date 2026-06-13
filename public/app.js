@@ -292,16 +292,65 @@ async function loadAdminPanel() {
     </div>
     <div class="admin-users">
       ${users.map(u => `
-        <div class="friend-row">
-          <div class="friend-info">
-            <span>${u.username}${u.isAdmin ? ' 👑' : ''}</span>
-            <span class="friend-progress">${u.completed} climbed</span>
+        <div class="admin-user" data-user="${u.id}">
+          <div class="admin-user-head">
+            <span class="admin-user-name">${u.username}${u.isAdmin ? ' 👑' : ''}</span>
+            <span class="admin-user-progress">${u.completed} climbed</span>
+            <button class="link-btn" data-toggle-edit="${u.id}">Edit</button>
+            ${!u.isAdmin ? `<button class="secondary" data-delete-user="${u.id}">Delete</button>` : ''}
           </div>
-          ${!u.isAdmin ? `<button class="secondary" data-delete-user="${u.id}">Delete</button>` : ''}
+          <div class="admin-user-edit hidden" data-edit="${u.id}">
+            <label>Username
+              <input type="text" name="username" value="${u.username}" />
+            </label>
+            <label>Email
+              <input type="email" name="email" value="${u.email}" />
+            </label>
+            <label class="admin-checkbox">
+              <input type="checkbox" name="isAdmin" ${u.isAdmin ? 'checked' : ''} ${u.id === currentUser.id ? 'disabled' : ''} />
+              Admin
+            </label>
+            <label>New password <span class="hint-inline">(leave blank to keep current)</span>
+              <input type="password" name="password" placeholder="••••••••" />
+            </label>
+            <p class="error" data-error="${u.id}"></p>
+            <button type="button" class="popup-btn" data-save-user="${u.id}">Save changes</button>
+          </div>
         </div>
       `).join('')}
     </div>
   `;
+
+  el.querySelectorAll('[data-toggle-edit]').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelector(`[data-edit="${btn.dataset.toggleEdit}"]`).classList.toggle('hidden');
+    };
+  });
+
+  el.querySelectorAll('[data-save-user]').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.dataset.saveUser;
+      const editEl = document.querySelector(`[data-edit="${id}"]`);
+      const errEl = document.querySelector(`[data-error="${id}"]`);
+      const payload = {
+        username: editEl.querySelector('[name="username"]').value.trim(),
+        email: editEl.querySelector('[name="email"]').value.trim(),
+        isAdmin: editEl.querySelector('[name="isAdmin"]').checked,
+      };
+      const password = editEl.querySelector('[name="password"]').value;
+      if (password) payload.password = password;
+
+      const res = await fetch(`${API}/admin/users/${id}`, {
+        method: 'PATCH',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error; return; }
+      errEl.textContent = '';
+      loadAdminPanel();
+    };
+  });
 
   el.querySelectorAll('[data-delete-user]').forEach(btn => {
     btn.onclick = async () => {

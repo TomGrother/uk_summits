@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
@@ -68,6 +69,57 @@ router.get('/users', requireAuth, requireAdmin, (req, res) => {
     ORDER BY u.created_at DESC
   `).all();
   res.json({ users: users.map(u => ({ ...u, isAdmin: !!u.is_admin })) });
+});
+
+// Update a user's username, email, admin status, and/or password.
+router.patch('/users/:id', requireAuth, requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const { username, email, isAdmin, password } = req.body || {};
+
+  if (username !== undefined && username !== user.username) {
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      return res.status(400).json({ error: 'Username must be 3-20 characters (letters, numbers, underscore)' });
+    }
+    const clash = db.prepare('SELECT id FROM users WHERE username = ? AND id != ?').get(username, id);
+    if (clash) return res.status(409).json({ error: 'Username already taken' });
+  }
+
+  if (email !== undefined && email !== user.email) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+    const clash = db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(email, id);
+    if (clash) return res.status(409).json({ error: 'Email already in use' });
+  }
+
+  if (isAdmin === false && id === req.user.id) {
+    return res.status(400).json({ error: "You can't remove your own admin access" });
+  }
+
+  if (password) {
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(password, 10), id);
+  }
+
+  db.prepare(`
+    UPDATE users SET
+      username = ?,
+      email = ?,
+      is_admin = ?
+    WHERE id = ?
+  `).run(
+    username !== undefined ? username : user.username,
+    email !== undefined ? email : user.email,
+    isAdmin !== undefined ? (isAdmin ? 1 : 0) : user.is_admin,
+    id
+  );
+
+  res.json({ ok: true });
 });
 
 router.delete('/users/:id', requireAuth, requireAdmin, (req, res) => {
