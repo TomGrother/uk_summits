@@ -523,8 +523,8 @@ async function loadGallery(summitId) {
     ${data.images.length > PREVIEW_COUNT ? `<button class="gallery-view-all" data-view-all="${summitId}">View all ${data.images.length} photos</button>` : ''}
   `;
 
-  el.querySelectorAll('.gallery-thumb').forEach(btn => {
-    btn.onclick = () => openLightbox(btn.dataset.lightboxSrc, btn.dataset.lightboxBy);
+  el.querySelectorAll('.gallery-thumb').forEach((btn, i) => {
+    btn.onclick = () => openLightbox(data.images, i);
   });
 
   const viewAllBtn = el.querySelector('.gallery-view-all');
@@ -536,21 +536,48 @@ async function loadGallery(summitId) {
 function openFullGallery(images) {
   const grid = document.getElementById('fullGalleryGrid');
   grid.innerHTML = images.map(img => `
-    <button class="gallery-thumb" data-lightbox-src="${img.url}" data-lightbox-by="${img.username}" title="By ${img.username}">
+    <button class="gallery-thumb" title="By ${img.username}">
       <img src="${img.url}" alt="Photo by ${img.username}" loading="lazy" />
     </button>
   `).join('');
-  grid.querySelectorAll('.gallery-thumb').forEach(btn => {
-    btn.onclick = () => openLightbox(btn.dataset.lightboxSrc, btn.dataset.lightboxBy);
+  grid.querySelectorAll('.gallery-thumb').forEach((btn, i) => {
+    btn.onclick = () => openLightbox(images, i);
   });
   document.getElementById('fullGalleryModal').classList.remove('hidden');
 }
 
-function openLightbox(src, username) {
-  document.getElementById('lightboxImage').src = src;
-  document.getElementById('lightboxCaption').textContent = `Photo by ${username}`;
+let lightboxImages = [];
+let lightboxIndex = 0;
+
+function openLightbox(images, index) {
+  lightboxImages = images;
+  lightboxIndex = index;
+  renderLightbox();
   document.getElementById('lightboxModal').classList.remove('hidden');
 }
+
+function renderLightbox() {
+  const img = lightboxImages[lightboxIndex];
+  document.getElementById('lightboxImage').src = img.url;
+  document.getElementById('lightboxCaption').textContent = `Photo by ${img.username} (${lightboxIndex + 1}/${lightboxImages.length})`;
+  const multi = lightboxImages.length > 1;
+  document.getElementById('lightboxPrev').classList.toggle('hidden', !multi);
+  document.getElementById('lightboxNext').classList.toggle('hidden', !multi);
+}
+
+function lightboxStep(delta) {
+  if (!lightboxImages.length) return;
+  lightboxIndex = (lightboxIndex + delta + lightboxImages.length) % lightboxImages.length;
+  renderLightbox();
+}
+
+document.getElementById('lightboxPrev').onclick = () => lightboxStep(-1);
+document.getElementById('lightboxNext').onclick = () => lightboxStep(1);
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('lightboxModal').classList.contains('hidden')) return;
+  if (e.key === 'ArrowLeft') lightboxStep(-1);
+  if (e.key === 'ArrowRight') lightboxStep(1);
+});
 
 async function toggleCompletion(id) {
   const summit = summits.find(s => s.id === id);
