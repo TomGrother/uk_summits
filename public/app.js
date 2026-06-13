@@ -509,19 +509,41 @@ async function loadGallery(summitId) {
     return;
   }
 
+  const PREVIEW_COUNT = 4;
+  const preview = data.images.slice(0, PREVIEW_COUNT);
+
   el.innerHTML = `
     <div class="gallery-grid">
-      ${data.images.map(img => `
+      ${preview.map(img => `
         <button class="gallery-thumb" data-lightbox-src="${img.url}" data-lightbox-by="${img.username}" title="By ${img.username}">
           <img src="${img.url}" alt="Photo by ${img.username}" loading="lazy" />
         </button>
       `).join('')}
     </div>
+    ${data.images.length > PREVIEW_COUNT ? `<button class="gallery-view-all" data-view-all="${summitId}">View all ${data.images.length} photos</button>` : ''}
   `;
 
   el.querySelectorAll('.gallery-thumb').forEach(btn => {
     btn.onclick = () => openLightbox(btn.dataset.lightboxSrc, btn.dataset.lightboxBy);
   });
+
+  const viewAllBtn = el.querySelector('.gallery-view-all');
+  if (viewAllBtn) {
+    viewAllBtn.onclick = () => openFullGallery(data.images);
+  }
+}
+
+function openFullGallery(images) {
+  const grid = document.getElementById('fullGalleryGrid');
+  grid.innerHTML = images.map(img => `
+    <button class="gallery-thumb" data-lightbox-src="${img.url}" data-lightbox-by="${img.username}" title="By ${img.username}">
+      <img src="${img.url}" alt="Photo by ${img.username}" loading="lazy" />
+    </button>
+  `).join('');
+  grid.querySelectorAll('.gallery-thumb').forEach(btn => {
+    btn.onclick = () => openLightbox(btn.dataset.lightboxSrc, btn.dataset.lightboxBy);
+  });
+  document.getElementById('fullGalleryModal').classList.remove('hidden');
 }
 
 function openLightbox(src, username) {
