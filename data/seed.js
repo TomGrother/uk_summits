@@ -9,12 +9,12 @@ const insert = db.prepare(`
   VALUES (@name, @region, @classification, @height_m, @lat, @lng)
 `);
 
-const reset = process.argv.includes('--reset');
+function seed({ reset = false } = {}) {
+  const existing = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
+  if (existing > 0 && !reset) {
+    return { seeded: false, existing };
+  }
 
-const existing = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
-if (existing > 0 && !reset) {
-  console.log(`summits table already has ${existing} rows, skipping seed (use --reset to replace)`);
-} else {
   const run = db.transaction((rows) => {
     if (reset) {
       db.exec('DELETE FROM completions');
@@ -23,5 +23,17 @@ if (existing > 0 && !reset) {
     for (const s of rows) insert.run(s);
   });
   run(summits);
-  console.log(`Seeded ${summits.length} summits${reset ? ' (reset)' : ''}`);
+  return { seeded: true, count: summits.length };
 }
+
+if (require.main === module) {
+  const reset = process.argv.includes('--reset');
+  const result = seed({ reset });
+  if (!result.seeded) {
+    console.log(`summits table already has ${result.existing} rows, skipping seed (use --reset to replace)`);
+  } else {
+    console.log(`Seeded ${result.count} summits${reset ? ' (reset)' : ''}`);
+  }
+}
+
+module.exports = { seed };

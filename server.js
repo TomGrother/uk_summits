@@ -6,6 +6,11 @@ const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const summitRoutes = require('./routes/summits');
+const { seed } = require('./data/seed');
+
+// Populate the summits table on first run (no-op if already seeded).
+const seedResult = seed();
+if (seedResult.seeded) console.log(`Seeded ${seedResult.count} summits`);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
