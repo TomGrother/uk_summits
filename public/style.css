@@ -424,6 +424,47 @@ main {
 .welcome-feature-icon { font-size: 1.4rem; line-height: 1; }
 .welcome-feature strong { display: block; font-size: 0.85rem; margin-bottom: 2px; }
 .welcome-feature p { margin: 0; font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; }
+.welcome-feature-wide { grid-column: 1 / -1; }
+
+.mini-map-mockup {
+  position: relative;
+  margin-top: 10px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent 40%),
+    linear-gradient(135deg, #4a7c3a, #2d5a3d 45%, #1f3a4f 100%);
+  border: 1px solid var(--border);
+}
+.mini-pin {
+  position: absolute;
+  font-size: 1.1rem;
+  transform: translate(-50%, -100%);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+}
+.mini-pin-done { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)) hue-rotate(120deg); }
+
+.mini-progress-mockup { margin-top: 10px; }
+.mini-progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.mini-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+.mini-progress-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
 
 .welcome-preview {
   margin: 16px 24px;
