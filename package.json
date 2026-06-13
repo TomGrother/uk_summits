@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node data/seed.js",
-    "seed:reset": "node data/seed.js --reset"
+    "seed": "node seed/seed.js",
+    "seed:reset": "node seed/seed.js --reset"
   },
   "dependencies": {
     "better-sqlite3": "^11.3.0",

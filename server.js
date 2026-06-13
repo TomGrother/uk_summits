@@ -14,7 +14,7 @@ const summitRoutes = require('./routes/summits');
   const existing = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
   if (existing > 0) return;
 
-  const summits = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'summits.json'), 'utf8'));
+  const summits = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed', 'summits.json'), 'utf8'));
   const insert = db.prepare(`
     INSERT INTO summits (name, region, classification, height_m, lat, lng)
     VALUES (@name, @region, @classification, @height_m, @lat, @lng)
