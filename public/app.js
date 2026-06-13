@@ -54,33 +54,72 @@ async function renderProgress() {
   el.textContent = `${data.completed} / ${data.total} summits completed`;
 }
 
+// Small SVG mountain glyph used as a placeholder "photo" for each summit,
+// tinted by classification so the popup card feels branded rather than generic.
+const CLASS_COLORS = {
+  Munro: '#5b7fb5',
+  Wainwright: '#7a9b6e',
+  Nuttall: '#b58a5b',
+  Yorkshire: '#9b6eb5',
+  Shropshire: '#b56e7a',
+};
+
+function classColor(classification) {
+  return CLASS_COLORS[classification] || '#6b7b8c';
+}
+
+function summitImage(s) {
+  const c = classColor(s.classification);
+  return `
+    <svg viewBox="0 0 320 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <rect width="320" height="120" fill="${c}" opacity="0.18" />
+      <polygon points="0,120 70,40 120,80 180,20 260,90 320,60 320,120" fill="${c}" opacity="0.55" />
+      <polygon points="120,80 180,20 240,80" fill="#ffffff" opacity="0.85" />
+    </svg>
+  `;
+}
+
 function renderMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers.clear();
 
   summits.forEach(s => {
-    const color = s.completed ? '#2e7d32' : '#d32f2f';
-    const marker = L.circleMarker([s.lat, s.lng], {
-      radius: 6,
-      color,
-      fillColor: color,
-      fillOpacity: 0.85,
-      weight: 1,
-    }).addTo(map);
+    const color = s.completed ? '#2e7d32' : '#c0392b';
+    const icon = L.divIcon({
+      className: 'summit-marker',
+      html: `<div class="summit-pin" style="--pin-color:${color}"></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 20],
+      popupAnchor: [0, -18],
+    });
 
-    marker.bindPopup(popupHtml(s));
+    const marker = L.marker([s.lat, s.lng], { icon }).addTo(map);
+
+    marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
     marker.on('popupopen', () => bindPopupActions(s, marker));
+    marker.on('mouseover', () => marker.openPopup());
     markers.set(s.id, marker);
   });
 }
 
 function popupHtml(s) {
   return `
-    <strong>${s.name}</strong><br/>
-    ${s.region} &middot; ${s.height_m} m${s.classification ? ` &middot; ${s.classification}` : ''}<br/>
-    ${currentUser
-      ? `<button data-action="toggle" data-id="${s.id}">${s.completed ? 'Mark as not climbed' : 'Mark as climbed'}</button>`
-      : '<em>Login to track this summit</em>'}
+    <div class="summit-popup">
+      <div class="summit-popup-image">${summitImage(s)}</div>
+      <div class="summit-popup-body">
+        <h3>${s.name}</h3>
+        <div class="summit-popup-tags">
+          <span class="tag">${s.height_m} m</span>
+          <span class="tag">${s.region}</span>
+          ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
+        </div>
+        ${currentUser
+          ? `<button class="popup-btn ${s.completed ? 'is-done' : ''}" data-action="toggle" data-id="${s.id}">
+               ${s.completed ? '✓ Climbed' : 'Mark as climbed'}
+             </button>`
+          : '<p class="popup-hint">Login to track this summit</p>'}
+      </div>
+    </div>
   `;
 }
 
