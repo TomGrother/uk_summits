@@ -83,6 +83,50 @@ main {
 .auth-form .error { color: #c0392b; font-size: 0.85rem; min-height: 1em; margin: 0; }
 .auth-form .hint { font-size: 0.8rem; color: #777; margin: 0; }
 
+.welcome-content {
+  width: 420px;
+  max-width: 90vw;
+  text-align: center;
+}
+.welcome-content h2 { margin-top: 0; }
+.welcome-list {
+  text-align: left;
+  margin: 16px 0;
+  padding-left: 1.2em;
+  color: #444;
+  line-height: 1.5;
+}
+.welcome-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.welcome-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.welcome-actions button:not(.secondary) {
+  background: #4caf50; color: #fff; border: none;
+}
+.welcome-actions button.secondary {
+  background: transparent; border: 1px solid #4caf50; color: #2e7d32;
+}
+.welcome-explore {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* --- Summit markers --- */
 .summit-marker { background: none; border: none; }
 .summit-pin {

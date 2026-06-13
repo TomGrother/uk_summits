@@ -29,16 +29,44 @@ function renderAuthArea() {
     document.getElementById('logoutBtn').onclick = logout;
   } else {
     el.innerHTML = `<button id="loginBtn">Login / Register</button>`;
-    document.getElementById('loginBtn').onclick = () => document.getElementById('authModal').classList.remove('hidden');
+    document.getElementById('loginBtn').onclick = () => openAuthModal('login');
   }
 }
+
+function openAuthModal(tab) {
+  document.getElementById('welcomeGate').classList.add('hidden');
+  document.getElementById('authModal').classList.remove('hidden');
+  document.querySelector(`.tab-btn[data-tab="${tab}"]`).click();
+}
+
+function renderWelcomeGate() {
+  const gate = document.getElementById('welcomeGate');
+  if (currentUser) {
+    gate.classList.add('hidden');
+    return;
+  }
+  if (sessionStorage.getItem('exploreOnly')) {
+    gate.classList.add('hidden');
+    return;
+  }
+  gate.classList.remove('hidden');
+}
+
+document.getElementById('welcomeRegister').onclick = () => openAuthModal('register');
+document.getElementById('welcomeLogin').onclick = () => openAuthModal('login');
+document.getElementById('welcomeExplore').onclick = () => {
+  sessionStorage.setItem('exploreOnly', '1');
+  document.getElementById('welcomeGate').classList.add('hidden');
+};
 
 function logout() {
   token = null;
   currentUser = null;
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  sessionStorage.removeItem('exploreOnly');
   renderAuthArea();
+  renderWelcomeGate();
   loadSummits();
 }
 
@@ -207,8 +235,10 @@ function finishAuth(data) {
   localStorage.setItem('user', JSON.stringify(currentUser));
   authModal.classList.add('hidden');
   renderAuthArea();
+  renderWelcomeGate();
   loadSummits();
 }
 
 renderAuthArea();
+renderWelcomeGate();
 loadSummits();
