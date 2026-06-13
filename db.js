@@ -59,4 +59,9 @@ if (!summitColumns.includes('area')) {
   db.exec('ALTER TABLE summits ADD COLUMN area TEXT');
 }
 
+const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+if (!userColumns.includes('is_admin')) {
+  db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0');
+}
+
 module.exports = db;

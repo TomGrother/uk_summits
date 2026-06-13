@@ -14,4 +14,11 @@ function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth, SECRET };
+function requireAdmin(req, res, next) {
+  const db = require('../db');
+  const user = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(req.user.id);
+  if (!user || !user.is_admin) return res.status(403).json({ error: 'Admin access required' });
+  next();
+}
+
+module.exports = { requireAuth, requireAdmin, SECRET };

@@ -50,6 +50,19 @@ body {
 }
 .nav-dropdown.hidden { display: none; }
 
+.admin-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+#adminReseedBtn {
+  background: #4caf50; color: #fff; border: none; padding: 8px 14px;
+  border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-bottom: 8px;
+}
+.admin-users { margin-top: 8px; }
+
 main {
   position: relative;
   height: calc(100vh - 54px);

@@ -31,8 +31,8 @@ router.post('/register', authLimiter, (req, res) => {
     'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)'
   ).run(username, email, hash);
 
-  const token = jwt.sign({ id: result.lastInsertRowid, username }, SECRET, { expiresIn: '30d' });
-  res.json({ token, user: { id: result.lastInsertRowid, username } });
+  const token = jwt.sign({ id: result.lastInsertRowid, username, isAdmin: false }, SECRET, { expiresIn: '30d' });
+  res.json({ token, user: { id: result.lastInsertRowid, username, isAdmin: false } });
 });
 
 router.post('/login', authLimiter, (req, res) => {
@@ -44,8 +44,9 @@ router.post('/login', authLimiter, (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
-  const token = jwt.sign({ id: user.id, username: user.username }, SECRET, { expiresIn: '30d' });
-  res.json({ token, user: { id: user.id, username: user.username } });
+  const isAdmin = !!user.is_admin;
+  const token = jwt.sign({ id: user.id, username: user.username, isAdmin }, SECRET, { expiresIn: '30d' });
+  res.json({ token, user: { id: user.id, username: user.username, isAdmin } });
 });
 
 router.get('/me', requireAuth, (req, res) => {

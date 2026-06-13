@@ -26,9 +26,13 @@ function renderAuthArea() {
   const navEl = document.getElementById('navArea');
   const el = document.getElementById('authArea');
   if (currentUser) {
-    navEl.innerHTML = `<button class="secondary nav-btn" id="friendsBtn">Friends</button><button class="secondary nav-btn" id="badgesBtn">Badges</button>`;
+    navEl.innerHTML = `<button class="secondary nav-btn" id="friendsBtn">Friends</button><button class="secondary nav-btn" id="badgesBtn">Badges</button>`
+      + (currentUser.isAdmin ? `<button class="secondary nav-btn" id="adminBtn">Admin</button>` : '');
     document.getElementById('friendsBtn').onclick = () => toggleDropdown('friendsDropdown', loadFriends);
     document.getElementById('badgesBtn').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
+    if (currentUser.isAdmin) {
+      document.getElementById('adminBtn').onclick = () => toggleDropdown('adminDropdown', loadAdminPanel);
+    }
     el.innerHTML = `<span class="welcome">Hi, ${currentUser.username}</span><button class="secondary" id="logoutBtn">Logout</button>`;
     document.getElementById('logoutBtn').onclick = logout;
   } else {
@@ -38,10 +42,16 @@ function renderAuthArea() {
   }
 }
 
+const DROPDOWNS = {
+  friendsDropdown: 'friendsBtn',
+  badgesDropdown: 'badgesBtn',
+  adminDropdown: 'adminBtn',
+};
+
 function toggleDropdown(id, onOpen) {
   const dropdown = document.getElementById(id);
   const wasHidden = dropdown.classList.contains('hidden');
-  ['friendsDropdown', 'badgesDropdown'].forEach(other => {
+  Object.keys(DROPDOWNS).forEach(other => {
     document.getElementById(other).classList.add('hidden');
   });
   if (wasHidden) {
@@ -51,9 +61,8 @@ function toggleDropdown(id, onOpen) {
 }
 
 document.addEventListener('click', (e) => {
-  ['friendsDropdown', 'badgesDropdown'].forEach(id => {
+  Object.entries(DROPDOWNS).forEach(([id, btnId]) => {
     const dropdown = document.getElementById(id);
-    const btnId = id === 'friendsDropdown' ? 'friendsBtn' : 'badgesBtn';
     const btn = document.getElementById(btnId);
     if (!dropdown.contains(e.target) && e.target !== btn) {
       dropdown.classList.add('hidden');
@@ -223,6 +232,55 @@ async function loadMyBadges() {
       `).join('')}
     </div>
   `;
+}
+
+async function loadAdminPanel() {
+  const el = document.getElementById('adminDropdown');
+  const [statsRes, usersRes] = await Promise.all([
+    fetch(`${API}/admin/stats`, { headers: authHeaders() }),
+    fetch(`${API}/admin/users`, { headers: authHeaders() }),
+  ]);
+  const stats = await statsRes.json();
+  const { users } = await usersRes.json();
+
+  el.innerHTML = `
+    <h3>Admin Panel</h3>
+    <div class="admin-stats">
+      <span>${stats.users} users</span>
+      <span>${stats.summits} summits</span>
+      <span>${stats.completions} completions</span>
+    </div>
+    <button id="adminReseedBtn">Reseed summit data</button>
+    <p class="badge-hint" id="adminReseedMsg"></p>
+    <div class="admin-users">
+      ${users.map(u => `
+        <div class="friend-row">
+          <div class="friend-info">
+            <span>${u.username}${u.isAdmin ? ' 👑' : ''}</span>
+            <span class="friend-progress">${u.completed} climbed</span>
+          </div>
+          ${!u.isAdmin ? `<button class="secondary" data-delete-user="${u.id}">Delete</button>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('adminReseedBtn').onclick = async () => {
+    const res = await fetch(`${API}/admin/reseed-auth`, { method: 'POST', headers: authHeaders() });
+    const data = await res.json();
+    document.getElementById('adminReseedMsg').textContent = res.ok
+      ? `Reseeded ${data.count} summits.`
+      : (data.error || 'Reseed failed.');
+    if (res.ok) loadSummits();
+  };
+
+  el.querySelectorAll('[data-delete-user]').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('Delete this user?')) return;
+      await fetch(`${API}/admin/users/${btn.dataset.deleteUser}`, { method: 'DELETE', headers: authHeaders() });
+      loadAdminPanel();
+    };
+  });
 }
 
 async function loadFriends() {
