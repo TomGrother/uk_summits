@@ -647,33 +647,44 @@ main {
 /* ================= Mobile ================= */
 @media (max-width: 768px) {
   .topbar {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 6px;
     padding: 8px 10px;
-    gap: 6px;
   }
-  .topbar h1 { font-size: 1.05rem; flex-basis: 100%; order: 0; }
-  .sidebar-toggle { display: inline-block; order: 1; }
+  .topbar h1 { font-size: 1.05rem; grid-column: 1 / -1; grid-row: 1; }
+  .sidebar-toggle { grid-column: 1; grid-row: 2; }
 
   .auth-area {
-    order: 2;
+    grid-column: 2;
+    grid-row: 2;
     margin-left: 0;
     display: flex;
     align-items: center;
-    gap: 6px;
-    flex-basis: auto;
-    justify-content: flex-start;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
   }
-  .auth-area .welcome { margin-right: 0; }
+  .auth-area .welcome { margin-right: 0; white-space: nowrap; }
 
   .nav-area {
+    grid-column: 3;
+    grid-row: 2;
     margin-left: 0;
     margin-right: 0;
-    order: 3;
-    flex-basis: auto;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    min-width: 0;
   }
-  .nav-btn, .auth-area button { padding: 6px 10px; font-size: 0.8rem; }
+  .nav-btn, .auth-area button {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
   .nav-dropdown {
     position: fixed;
