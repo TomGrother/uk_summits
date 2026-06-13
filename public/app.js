@@ -153,6 +153,7 @@ function renderRegionList() {
               ${currentUser ? `<input type="checkbox" data-id="${s.id}" ${s.completed ? 'checked' : ''} />` : ''}
               <span class="summit-name">${s.name}</span>
               <span class="summit-height">${s.height_m}m</span>
+              <button class="zoom-to-btn" data-zoom-id="${s.id}">Zoom to</button>
             </div>
           `).join('')}
         </div>
@@ -185,6 +186,10 @@ function renderRegionList() {
       };
     }
     row.querySelector('.summit-name').onclick = () => focusSummit(id);
+    row.querySelector('.zoom-to-btn').onclick = (e) => {
+      e.stopPropagation();
+      focusSummit(id);
+    };
   });
 }
 

@@ -278,6 +278,18 @@ main {
 .region-summit:hover { background: var(--bg); }
 .region-summit input[type="checkbox"] { flex-shrink: 0; accent-color: var(--accent); width: 16px; height: 16px; }
 .region-summit .summit-height { color: var(--text-muted); font-size: 0.8rem; margin-left: auto; }
+.zoom-to-btn {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  background: rgba(24, 166, 115, 0.12);
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.zoom-to-btn:hover { background: rgba(24, 166, 115, 0.22); }
 .region-summit.active { background: rgba(24, 166, 115, 0.1); }
 
 .locate-btn {
