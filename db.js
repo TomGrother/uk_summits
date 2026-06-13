@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS summits (
   name TEXT NOT NULL,
   region TEXT NOT NULL,
   classification TEXT,
+  area TEXT,
   height_m REAL NOT NULL,
   lat REAL NOT NULL,
   lng REAL NOT NULL
@@ -41,5 +42,10 @@ CREATE TABLE IF NOT EXISTS completions (
 CREATE INDEX IF NOT EXISTS idx_summits_region ON summits(region);
 CREATE INDEX IF NOT EXISTS idx_completions_user ON completions(user_id);
 `);
+
+const summitColumns = db.prepare("PRAGMA table_info(summits)").all().map(c => c.name);
+if (!summitColumns.includes('area')) {
+  db.exec('ALTER TABLE summits ADD COLUMN area TEXT');
+}
 
 module.exports = db;

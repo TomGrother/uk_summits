@@ -20,8 +20,8 @@ function requireAdminSecret(req, res, next) {
 router.post('/reseed', requireAdminSecret, (req, res) => {
   const summits = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'seed', 'summits.json'), 'utf8'));
   const insert = db.prepare(`
-    INSERT INTO summits (name, region, classification, height_m, lat, lng)
-    VALUES (@name, @region, @classification, @height_m, @lat, @lng)
+    INSERT INTO summits (name, region, classification, area, height_m, lat, lng)
+    VALUES (@name, @region, @classification, @area, @height_m, @lat, @lng)
   `);
 
   const run = db.transaction((rows) => {

@@ -75,6 +75,86 @@ async function loadSummits() {
   summits = await res.json();
   renderMarkers();
   renderProgress();
+  renderRegionList();
+}
+
+const openRegions = new Set();
+
+function renderRegionList() {
+  const el = document.getElementById('regionList');
+  const groups = new Map();
+  summits.forEach(s => {
+    const area = s.area || 'Other';
+    if (!groups.has(area)) groups.set(area, []);
+    groups.get(area).push(s);
+  });
+
+  const sortedAreas = [...groups.keys()].sort();
+
+  el.innerHTML = sortedAreas.map(area => {
+    const list = groups.get(area).sort((a, b) => b.height_m - a.height_m);
+    const completed = list.filter(s => s.completed).length;
+    const isOpen = openRegions.has(area);
+    return `
+      <div class="region-group">
+        <div class="region-header" data-area="${area}">
+          <span>${area}</span>
+          <span class="region-progress">${completed}/${list.length}</span>
+        </div>
+        <div class="region-summits ${isOpen ? 'open' : ''}" data-area="${area}">
+          ${list.map(s => `
+            <div class="region-summit" data-id="${s.id}">
+              ${currentUser ? `<input type="checkbox" data-id="${s.id}" ${s.completed ? 'checked' : ''} />` : ''}
+              <span class="summit-name">${s.name}</span>
+              <span class="summit-height">${s.height_m}m</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  el.querySelectorAll('.region-header').forEach(header => {
+    header.onclick = () => {
+      const area = header.dataset.area;
+      const body = el.querySelector(`.region-summits[data-area="${area}"]`);
+      const willOpen = !body.classList.contains('open');
+      body.classList.toggle('open', willOpen);
+      if (willOpen) {
+        openRegions.add(area);
+        zoomToRegion(area);
+      } else {
+        openRegions.delete(area);
+      }
+    };
+  });
+
+  el.querySelectorAll('.region-summit').forEach(row => {
+    const id = Number(row.dataset.id);
+    const checkbox = row.querySelector('input[type="checkbox"]');
+    if (checkbox) {
+      checkbox.onclick = (e) => {
+        e.stopPropagation();
+        toggleCompletion(id);
+      };
+    }
+    row.querySelector('.summit-name').onclick = () => focusSummit(id);
+  });
+}
+
+function zoomToRegion(area) {
+  const list = summits.filter(s => s.area === area);
+  if (!list.length) return;
+  const bounds = L.latLngBounds(list.map(s => [s.lat, s.lng]));
+  map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+}
+
+function focusSummit(id) {
+  const summit = summits.find(s => s.id === id);
+  const marker = markers.get(id);
+  if (!summit || !marker) return;
+  map.setView([summit.lat, summit.lng], Math.max(map.getZoom(), 12));
+  marker.openPopup();
 }
 
 async function renderProgress() {
@@ -175,6 +255,7 @@ async function toggleCompletion(id) {
   summit.completed = !summit.completed;
   renderMarkers();
   renderProgress();
+  renderRegionList();
 
   const m = markers.get(id);
   if (m) m.openPopup();
