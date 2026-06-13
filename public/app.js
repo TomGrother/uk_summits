@@ -10,12 +10,19 @@ const WALES_BOUNDS = L.latLngBounds([51.3, -5.6], [53.5, -2.6]);
 const map = L.map('map', {
   maxBounds: WALES_BOUNDS.pad(0.15),
   minZoom: 8,
+  tap: true,
+  zoomSnap: 1,
+  wheelDebounceTime: 60,
+  fadeAnimation: false,
 }).fitBounds(WALES_BOUNDS);
 
 // Esri World Imagery - aerial/satellite tiles of the UK
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
+  detectRetina: true,
+  updateWhenZooming: false,
+  keepBuffer: 2,
 }).addTo(map);
 
 function authHeaders() {

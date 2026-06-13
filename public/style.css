@@ -170,7 +170,7 @@ main {
 .faq-list dt { font-weight: 700; margin-top: 14px; color: var(--text); }
 .faq-list dd { margin: 4px 0 0; color: var(--text-muted); line-height: 1.45; }
 .sitemap-list { line-height: 1.7; color: var(--text-muted); padding-left: 1.2em; }
-#map { flex: 1; height: 100%; }
+#map { flex: 1; height: 100%; transform: translateZ(0); }
 
 .sidebar {
   width: 320px;
