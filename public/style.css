@@ -642,30 +642,28 @@ main {
     padding: 8px 10px;
     gap: 6px;
   }
-  .topbar h1 { font-size: 1.05rem; flex: 1 1 auto; }
-  .sidebar-toggle { display: inline-block; order: -1; }
+  .topbar h1 { font-size: 1.05rem; flex-basis: 100%; order: 0; }
+  .sidebar-toggle { display: inline-block; order: 1; }
 
-  .nav-area {
-    margin-left: 0;
-    margin-right: 0;
-    order: 3;
-    flex-basis: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-  .topbar h1 { order: 0; flex: 1 1 auto; }
-  .sidebar-toggle { order: 1; }
   .auth-area {
     order: 2;
     margin-left: 0;
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-basis: 100%;
+    flex-basis: auto;
     justify-content: flex-start;
   }
   .auth-area .welcome { margin-right: 0; }
-  .nav-area { order: 3; }
+
+  .nav-area {
+    margin-left: 0;
+    margin-right: 0;
+    order: 3;
+    flex-basis: auto;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
   .nav-btn, .auth-area button { padding: 6px 10px; font-size: 0.8rem; }
 
   .nav-dropdown {
