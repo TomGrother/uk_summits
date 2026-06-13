@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS summits (
   classification TEXT,
   area TEXT,
   wiki TEXT,
+  image TEXT,
   height_m REAL NOT NULL,
   lat REAL NOT NULL,
   lng REAL NOT NULL
@@ -61,6 +62,9 @@ if (!summitColumns.includes('area')) {
 }
 if (!summitColumns.includes('wiki')) {
   db.exec('ALTER TABLE summits ADD COLUMN wiki TEXT');
+}
+if (!summitColumns.includes('image')) {
+  db.exec('ALTER TABLE summits ADD COLUMN image TEXT');
 }
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);

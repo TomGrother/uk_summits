@@ -398,7 +398,7 @@ function renderMarkers() {
 function popupHtml(s) {
   return `
     <div class="summit-popup">
-      <div class="summit-popup-image">${summitImage(s)}</div>
+      <div class="summit-popup-image">${s.image ? `<img src="${s.image}" alt="${s.name}" loading="lazy" />` : summitImage(s)}</div>
       <div class="summit-popup-body">
         <h3>${s.name}</h3>
         ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}

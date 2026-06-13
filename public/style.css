@@ -283,7 +283,13 @@ main {
 .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: 10px; }
 .leaflet-popup-content { margin: 0; width: 240px !important; }
 .summit-popup-image { line-height: 0; }
-.summit-popup-image svg { display: block; width: 100%; height: 80px; }
+.summit-popup-image svg,
+.summit-popup-image img {
+  display: block;
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+}
 .summit-popup-body { padding: 10px 12px 12px; }
 .summit-popup-body h3 {
   margin: 0 0 6px;
