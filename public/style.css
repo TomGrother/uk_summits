@@ -554,6 +554,17 @@ main {
   color: #d7ead9;
   font-weight: 500;
 }
+.welcome-beta-note {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  padding: 5px 14px;
+  display: inline-block;
+}
 
 .welcome-intro {
   text-align: left;
