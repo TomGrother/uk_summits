@@ -70,3 +70,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`UK Summits server running on http://localhost:${PORT}`);
 });
+
+require('./lib/altNames').backfillAltNames().catch(err => console.error('Alt name backfill failed:', err));

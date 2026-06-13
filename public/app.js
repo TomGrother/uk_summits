@@ -122,7 +122,7 @@ function renderRegionList() {
 
   const groups = new Map();
   summits.forEach(s => {
-    if (searching && !s.name.toLowerCase().includes(term)) return;
+    if (searching && !s.name.toLowerCase().includes(term) && !(s.alt_name || '').toLowerCase().includes(term)) return;
     const area = s.area || 'Other';
     if (!groups.has(area)) groups.set(area, []);
     groups.get(area).push(s);
@@ -149,7 +149,7 @@ function renderRegionList() {
           ${list.map(s => `
             <div class="region-summit" data-id="${s.id}">
               ${currentUser ? `<input type="checkbox" data-id="${s.id}" ${s.completed ? 'checked' : ''} />` : ''}
-              <span class="summit-name">${s.name}</span>
+              <span class="summit-name">${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</span>
               <span class="summit-height">${s.height_m}m</span>
               <button class="zoom-to-btn" data-zoom-id="${s.id}">Zoom to</button>
             </div>
@@ -376,7 +376,7 @@ function popupHtml(s) {
     <div class="summit-popup">
       <div class="summit-popup-image">${s.image ? `<img src="${s.image}" alt="${s.name}" loading="lazy" />` : summitImage(s)}</div>
       <div class="summit-popup-body">
-        <h3>${s.name}</h3>
+        <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
         ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>

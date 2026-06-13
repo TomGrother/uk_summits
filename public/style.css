@@ -486,6 +486,7 @@ main {
   height: 80px;
   object-fit: cover;
 }
+.alt-name { font-weight: 400; color: var(--text-muted); font-size: 0.85em; }
 .summit-popup-body { padding: 10px 12px 12px; }
 .summit-popup-body h3 {
   margin: 0 0 6px;
