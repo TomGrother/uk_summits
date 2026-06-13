@@ -28,6 +28,28 @@ body {
 .auth-area button.secondary { background: transparent; border: 1px solid #fff; }
 .auth-area .welcome { margin-right: 8px; }
 
+.nav-area { display: flex; gap: 8px; margin-left: auto; margin-right: 16px; position: relative; }
+.nav-btn {
+  background: transparent; color: #fff; border: 1px solid #fff;
+  padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem;
+}
+
+.nav-dropdown {
+  position: absolute;
+  top: 54px;
+  right: 16px;
+  z-index: 900;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  padding: 16px;
+  width: 340px;
+  max-width: 92vw;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.nav-dropdown.hidden { display: none; }
+
 main {
   position: relative;
   height: calc(100vh - 54px);
@@ -60,9 +82,6 @@ main {
   cursor: default;
 }
 
-.friends-content { width: 640px; max-width: 92vw; text-align: left; }
-.friends-columns { display: flex; gap: 24px; }
-.friends-column { flex: 1; min-width: 0; max-height: 60vh; overflow-y: auto; }
 .my-badges h3 { margin: 0 0 8px; font-size: 1rem; }
 .badge-grid {
   display: grid;

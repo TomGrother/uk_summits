@@ -10,6 +10,7 @@
 <body>
   <header class="topbar">
     <h1>UK Summits</h1>
+    <nav id="navArea" class="nav-area"></nav>
     <div id="authArea" class="auth-area"></div>
   </header>
 
@@ -22,29 +23,21 @@
     <div id="progress" class="progress"></div>
   </main>
 
-  <!-- Friends & Badges panel -->
-  <div id="friendsModal" class="modal hidden">
-    <div class="modal-content friends-content">
-      <button class="close-btn" id="closeFriends">&times;</button>
-      <h2>Friends &amp; Badges</h2>
+  <!-- Friends dropdown -->
+  <div id="friendsDropdown" class="nav-dropdown hidden">
+    <form id="addFriendForm" class="add-friend-form">
+      <input name="username" placeholder="Friend's username" required />
+      <button type="submit">Add</button>
+    </form>
+    <p class="error" id="friendError"></p>
 
-      <div class="friends-columns">
-        <div class="friends-column">
-          <form id="addFriendForm" class="add-friend-form">
-            <input name="username" placeholder="Friend's username" required />
-            <button type="submit">Add</button>
-          </form>
-          <p class="error" id="friendError"></p>
+    <div id="friendRequests" class="friend-requests"></div>
+    <div id="friendList" class="friend-list"></div>
+  </div>
 
-          <div id="friendRequests" class="friend-requests"></div>
-          <div id="friendList" class="friend-list"></div>
-        </div>
-
-        <div class="friends-column">
-          <div id="myBadges" class="my-badges"></div>
-        </div>
-      </div>
-    </div>
+  <!-- Badges dropdown -->
+  <div id="badgesDropdown" class="nav-dropdown hidden">
+    <div id="myBadges" class="my-badges"></div>
   </div>
 
   <!-- Logged-out welcome / gate -->

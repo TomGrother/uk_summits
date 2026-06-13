@@ -23,16 +23,43 @@ function authHeaders() {
 }
 
 function renderAuthArea() {
+  const navEl = document.getElementById('navArea');
   const el = document.getElementById('authArea');
   if (currentUser) {
-    el.innerHTML = `<span class="welcome">Hi, ${currentUser.username}</span><button class="secondary" id="friendsBtn">Friends</button><button class="secondary" id="logoutBtn">Logout</button>`;
+    navEl.innerHTML = `<button class="secondary nav-btn" id="friendsBtn">Friends</button><button class="secondary nav-btn" id="badgesBtn">Badges</button>`;
+    document.getElementById('friendsBtn').onclick = () => toggleDropdown('friendsDropdown', loadFriends);
+    document.getElementById('badgesBtn').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
+    el.innerHTML = `<span class="welcome">Hi, ${currentUser.username}</span><button class="secondary" id="logoutBtn">Logout</button>`;
     document.getElementById('logoutBtn').onclick = logout;
-    document.getElementById('friendsBtn').onclick = openFriendsModal;
   } else {
+    navEl.innerHTML = '';
     el.innerHTML = `<button id="loginBtn">Login / Register</button>`;
     document.getElementById('loginBtn').onclick = () => openAuthModal('login');
   }
 }
+
+function toggleDropdown(id, onOpen) {
+  const dropdown = document.getElementById(id);
+  const wasHidden = dropdown.classList.contains('hidden');
+  ['friendsDropdown', 'badgesDropdown'].forEach(other => {
+    document.getElementById(other).classList.add('hidden');
+  });
+  if (wasHidden) {
+    dropdown.classList.remove('hidden');
+    onOpen();
+  }
+}
+
+document.addEventListener('click', (e) => {
+  ['friendsDropdown', 'badgesDropdown'].forEach(id => {
+    const dropdown = document.getElementById(id);
+    const btnId = id === 'friendsDropdown' ? 'friendsBtn' : 'badgesBtn';
+    const btn = document.getElementById(btnId);
+    if (!dropdown.contains(e.target) && e.target !== btn) {
+      dropdown.classList.add('hidden');
+    }
+  });
+});
 
 function openAuthModal(tab) {
   document.getElementById('welcomeGate').classList.add('hidden');
@@ -198,12 +225,6 @@ async function loadMyBadges() {
   `;
 }
 
-function openFriendsModal() {
-  document.getElementById('friendsModal').classList.remove('hidden');
-  loadFriends();
-  loadMyBadges();
-}
-
 async function loadFriends() {
   const [friendsRes, requestsRes] = await Promise.all([
     fetch(`${API}/friends`, { headers: authHeaders() }),
@@ -251,8 +272,6 @@ async function loadFriends() {
       `).join('')}`
     : '<p class="badge-hint">No friends yet. Add someone by username above.</p>';
 }
-
-document.getElementById('closeFriends').onclick = () => document.getElementById('friendsModal').classList.add('hidden');
 
 document.getElementById('addFriendForm').addEventListener('submit', async (e) => {
   e.preventDefault();
