@@ -557,10 +557,10 @@ main {
 .welcome-beta-note {
   margin: 10px 0 0;
   font-size: 0.78rem;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.25);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #1a1a1a;
+  background: var(--warn);
   border-radius: 999px;
   padding: 5px 14px;
   display: inline-block;
