@@ -44,7 +44,7 @@ function renderAuthArea() {
   const el = document.getElementById('authArea');
   if (currentUser) {
     navEl.innerHTML = '';
-    el.innerHTML = `<button class="secondary nav-btn" id="accountBtn">${currentUser.username} &#9662;</button>`;
+    el.innerHTML = `<button class="secondary nav-btn" id="accountBtn">My Account &#9662;</button>`;
     document.getElementById('accountBtn').onclick = () => toggleDropdown('accountMenu', renderAccountMenu);
   } else {
     navEl.innerHTML = '';
