@@ -368,12 +368,12 @@ main {
   font-weight: 700;
   font-size: 0.95rem;
   color: var(--text);
-  background: var(--bg);
+  background: #dde3ea;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
   transition: background 0.15s ease;
 }
-.classification-header:hover { background: var(--surface); }
+.classification-header:hover { background: #d2dae3; }
 .classification-header .region-progress {
   font-weight: 600;
   font-size: 0.75rem;
