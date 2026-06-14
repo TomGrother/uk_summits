@@ -813,7 +813,6 @@ main {
 /* --- Summit popup card --- */
 .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); }
 .leaflet-popup-content { margin: 0; width: 240px !important; }
-.leaflet-popup.has-routes .leaflet-popup-content { width: 340px !important; }
 .summit-popup-image { line-height: 0; }
 .summit-popup-image svg,
 .summit-popup-image img {
@@ -873,58 +872,6 @@ main {
 .popup-hint { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
 
 .summit-gallery { margin-top: 10px; }
-
-.summit-routes:empty { display: none; }
-.summit-routes {
-  margin-top: 12px;
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-}
-.summit-routes-title {
-  margin: 0 0 6px;
-  font-size: 0.85rem;
-}
-.route-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.route-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  flex: 1 1 calc(50% - 6px);
-  text-align: left;
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--route-color, var(--accent));
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text);
-  transition: background 0.15s ease;
-}
-.route-chip:hover { background: rgba(24, 166, 115, 0.08); }
-.route-chip.active {
-  background: var(--route-color, var(--accent));
-  color: #fff;
-  border-color: var(--route-color, var(--accent));
-}
-.route-meta {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-.route-chip.active .route-meta { color: rgba(255,255,255,0.85); }
-.route-description {
-  margin: 8px 0 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
 
 .summit-reviews-summary { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
 .reviews-loading, .reviews-empty {
@@ -1341,8 +1288,6 @@ main {
   .welcome-features { grid-template-columns: 1fr; }
 
   .leaflet-popup-content { width: 200px !important; }
-  .leaflet-popup.has-routes .leaflet-popup-content { width: 280px !important; }
-  .route-chip { flex: 1 1 100%; }
 
   .topbar h1 { min-width: 0; }
   .nav-area, .auth-area { min-width: 0; }

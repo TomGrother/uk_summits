@@ -26,16 +26,6 @@ router.get('/', (req, res) => {
   res.json(summits.map(s => ({ ...s, completed: completedIds.has(s.id) })));
 });
 
-// List walking routes for a summit.
-router.get('/:id/routes', (req, res) => {
-  const routes = db.prepare(`
-    SELECT id, name, distance_km, ascent_m, difficulty, description, geojson, source
-    FROM summit_routes WHERE summit_id = ? ORDER BY distance_km ASC
-  `).all(req.params.id);
-
-  res.json({ routes: routes.map(r => ({ ...r, geojson: JSON.parse(r.geojson) })) });
-});
-
 // Get the logged-in user's progress summary.
 router.get('/progress', requireAuth, (req, res) => {
   const total = db.prepare('SELECT COUNT(*) AS c FROM summits').get().c;
