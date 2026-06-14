@@ -620,7 +620,7 @@ function bindPopupActions(s, marker) {
 
   loadGallery(s.id);
   loadReviews(s.id);
-  loadRoutes(s.id);
+  loadRoutes(s.id, marker);
 
   const fileInput = document.querySelector(`[data-upload="${s.id}"]`);
   if (fileInput) {
@@ -781,7 +781,7 @@ function clearRouteLines() {
   activeRouteId = null;
 }
 
-async function loadRoutes(summitId) {
+async function loadRoutes(summitId, marker) {
   const el = document.querySelector(`[data-routes="${summitId}"]`);
   if (!el) return;
   const res = await fetch(`${API}/summits/${summitId}/routes`);
@@ -793,6 +793,10 @@ async function loadRoutes(summitId) {
     el.innerHTML = '';
     return;
   }
+
+  const wrapper = el.closest('.leaflet-popup');
+  if (wrapper) wrapper.classList.add('has-routes');
+  if (marker && marker.getPopup) marker.getPopup().update();
 
   el.innerHTML = `
     <h4 class="summit-routes-title">🥾 Walking routes</h4>

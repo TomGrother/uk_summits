@@ -813,6 +813,7 @@ main {
 /* --- Summit popup card --- */
 .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); }
 .leaflet-popup-content { margin: 0; width: 240px !important; }
+.leaflet-popup.has-routes .leaflet-popup-content { width: 340px !important; }
 .summit-popup-image { line-height: 0; }
 .summit-popup-image svg,
 .summit-popup-image img {
@@ -885,7 +886,8 @@ main {
 }
 .route-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 6px;
 }
 .route-chip {
@@ -893,6 +895,7 @@ main {
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
+  flex: 1 1 calc(50% - 6px);
   text-align: left;
   border: 1px solid var(--border);
   border-left: 4px solid var(--route-color, var(--accent));
@@ -1338,6 +1341,8 @@ main {
   .welcome-features { grid-template-columns: 1fr; }
 
   .leaflet-popup-content { width: 200px !important; }
+  .leaflet-popup.has-routes .leaflet-popup-content { width: 280px !important; }
+  .route-chip { flex: 1 1 100%; }
 
   .topbar h1 { min-width: 0; }
   .nav-area, .auth-area { min-width: 0; }
