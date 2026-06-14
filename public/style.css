@@ -1281,6 +1281,10 @@ main {
     border-radius: 0;
   }
 
+  .welcome-hero {
+    border-radius: 0;
+  }
+
   .welcome-features { grid-template-columns: 1fr; }
 
   .leaflet-popup-content { width: 200px !important; }
