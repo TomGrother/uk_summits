@@ -129,6 +129,7 @@ const CLASSIFICATION_GROUPS = {
   Nuttall: 'Welsh Nuttalls',
   Wainwright: 'Lake District Wainwrights',
   Munro: 'Scottish Munros',
+  'Peak District': 'Peak District Hills',
 };
 
 function renderRegionList() {
@@ -475,6 +476,7 @@ const CLASS_COLORS = {
   Nuttall: '#b58a5b',
   Yorkshire: '#9b6eb5',
   Shropshire: '#b56e7a',
+  'Peak District': '#c9a13b',
 };
 
 function classColor(classification) {
