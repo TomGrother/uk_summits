@@ -1012,6 +1012,25 @@ main {
 .my-photo-thumb {
   position: relative;
 }
+.my-photo-tile {
+  position: relative;
+}
+.my-photo-delete {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 26px; height: 26px;
+  border: none; border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.my-photo-delete:hover { background: var(--danger); }
 .full-gallery-grid .my-photo-thumb img {
   height: auto;
   aspect-ratio: 1 / 1;

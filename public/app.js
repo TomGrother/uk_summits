@@ -863,14 +863,36 @@ function renderMyPhotosSummit(entry) {
   grid.classList.remove('my-photos-summit-grid');
 
   grid.innerHTML = entry.images.map(img => `
-    <button class="gallery-thumb my-photo-thumb">
-      <img src="${img.url}" alt="Photo at ${entry.summit_name}" loading="lazy" />
-    </button>
+    <div class="my-photo-tile">
+      <button class="gallery-thumb my-photo-thumb">
+        <img src="${img.url}" alt="Photo at ${entry.summit_name}" loading="lazy" />
+      </button>
+      <button class="my-photo-delete" data-delete-image="${img.id}" title="Delete photo" aria-label="Delete photo">&times;</button>
+    </div>
   `).join('')
   + `<button class="secondary my-photo-zoom" data-zoom-summit="${entry.summit_id}">📍 Show on map</button>`;
 
   grid.querySelectorAll('.my-photo-thumb').forEach((btn, i) => {
     btn.onclick = () => openLightbox(entry.images, i);
+  });
+  grid.querySelectorAll('[data-delete-image]').forEach(btn => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm('Delete this photo? This cannot be undone.')) return;
+      const imageId = btn.dataset.deleteImage;
+      const res = await fetch(`${API}/summits/images/${imageId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (!res.ok) { alert('Failed to delete photo.'); return; }
+      entry.images = entry.images.filter(img => String(img.id) !== String(imageId));
+      if (!entry.images.length) {
+        myPhotosBySummit = myPhotosBySummit.filter(e2 => e2.summit_id !== entry.summit_id);
+        renderMyPhotosTiles();
+      } else {
+        renderMyPhotosSummit(entry);
+      }
+    };
   });
   grid.querySelector('[data-zoom-summit]').onclick = () => {
     document.getElementById('myPhotosModal').classList.add('hidden');
