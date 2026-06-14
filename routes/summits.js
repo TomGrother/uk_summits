@@ -102,7 +102,8 @@ router.get('/:id/weather', async (req, res) => {
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${summit.lat}&longitude=${summit.lng}` +
       `&current=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,weather_code` +
-      `&elevation=${summit.height_m}&wind_speed_unit=mph&timezone=auto`;
+      `&hourly=temperature_2m,weather_code,precipitation_probability` +
+      `&elevation=${summit.height_m}&wind_speed_unit=mph&timezone=auto&forecast_days=1`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Open-Meteo responded ${response.status}`);
@@ -111,6 +112,23 @@ router.get('/:id/weather', async (req, res) => {
     const code = current.weather_code;
     const info = WEATHER_CODES[code] || { label: 'Unknown', icon: '❓' };
 
+    const hourly = json.hourly || {};
+    const nowIso = current.time;
+    let startIdx = (hourly.time || []).findIndex(t => t > nowIso);
+    if (startIdx === -1) startIdx = 0;
+
+    const forecast = (hourly.time || []).slice(startIdx, startIdx + 4).map((time, i) => {
+      const idx = startIdx + i;
+      const hCode = hourly.weather_code[idx];
+      const hInfo = WEATHER_CODES[hCode] || { label: 'Unknown', icon: '❓' };
+      return {
+        time: time.slice(11, 16),
+        temperature: Math.round(hourly.temperature_2m[idx]),
+        precipitation: hourly.precipitation_probability[idx],
+        icon: hInfo.icon,
+      };
+    });
+
     const data = {
       temperature: Math.round(current.temperature_2m),
       feelsLike: Math.round(current.apparent_temperature),
@@ -118,6 +136,7 @@ router.get('/:id/weather', async (req, res) => {
       windGusts: Math.round(current.wind_gusts_10m),
       label: info.label,
       icon: info.icon,
+      forecast,
     };
 
     weatherCache.set(summit.id, { data, fetchedAt: Date.now() });

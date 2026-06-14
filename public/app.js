@@ -655,10 +655,24 @@ async function loadWeather(summitId) {
     if (!res.ok) throw new Error('Weather unavailable');
     const w = await res.json();
     el.innerHTML = `
-      <span class="weather-icon">${w.icon}</span>
-      <span class="weather-temp">${w.temperature}&deg;C</span>
-      <span class="weather-detail">Feels ${w.feelsLike}&deg;C &middot; ${w.label} &middot; ${w.windSpeed}mph wind (gusts ${w.windGusts}mph)</span>
+      <button class="weather-summary" type="button">
+        <span class="weather-icon">${w.icon}</span>
+        <span class="weather-temp">${w.temperature}&deg;C</span>
+        <span class="weather-detail">Feels ${w.feelsLike}&deg;C &middot; ${w.label} &middot; ${w.windSpeed}mph wind (gusts ${w.windGusts}mph)</span>
+        <span class="weather-toggle">▾</span>
+      </button>
+      <div class="weather-forecast">
+        ${(w.forecast || []).map(f => `
+          <div class="weather-forecast-item">
+            <span class="weather-forecast-time">${f.time}</span>
+            <span class="weather-forecast-icon">${f.icon}</span>
+            <span class="weather-forecast-temp">${f.temperature}&deg;</span>
+            <span class="weather-forecast-rain">${f.precipitation}%</span>
+          </div>
+        `).join('')}
+      </div>
     `;
+    el.querySelector('.weather-summary').onclick = () => el.classList.toggle('expanded');
   } catch {
     if (el.isConnected) el.innerHTML = '';
   }
