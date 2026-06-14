@@ -141,6 +141,26 @@ body {
 }
 .nav-dropdown.hidden { display: none; }
 
+.account-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.account-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+.account-menu-item:hover { background: var(--bg); }
+
 .admin-stats {
   display: flex;
   gap: 12px;

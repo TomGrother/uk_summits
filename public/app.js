@@ -43,16 +43,9 @@ function renderAuthArea() {
   const navEl = document.getElementById('navArea');
   const el = document.getElementById('authArea');
   if (currentUser) {
-    navEl.innerHTML = `<button class="secondary nav-btn" id="badgesBtn">Badges</button>`
-      + `<button class="secondary nav-btn" id="myPhotosBtn">My Photos</button>`
-      + (currentUser.isAdmin ? `<button class="secondary nav-btn" id="adminBtn">Admin</button>` : '');
-    document.getElementById('badgesBtn').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
-    document.getElementById('myPhotosBtn').onclick = () => openMyPhotos();
-    if (currentUser.isAdmin) {
-      document.getElementById('adminBtn').onclick = () => openAdminPanel();
-    }
-    el.innerHTML = `<span class="welcome">Hi, ${currentUser.username}</span><button class="secondary" id="logoutBtn">Logout</button>`;
-    document.getElementById('logoutBtn').onclick = logout;
+    navEl.innerHTML = '';
+    el.innerHTML = `<button class="secondary nav-btn" id="accountBtn">${currentUser.username} &#9662;</button>`;
+    document.getElementById('accountBtn').onclick = () => toggleDropdown('accountMenu', renderAccountMenu);
   } else {
     navEl.innerHTML = '';
     el.innerHTML = `<button id="loginBtn">Login / Register</button>`;
@@ -60,8 +53,31 @@ function renderAuthArea() {
   }
 }
 
+function renderAccountMenu() {
+  const list = document.getElementById('accountMenuList');
+  list.innerHTML = `
+    <button class="account-menu-item" id="menuBadges">🏆 Badges</button>
+    <button class="account-menu-item" id="menuMyPhotos">📷 My Photos</button>
+    ${currentUser.isAdmin ? `<button class="account-menu-item" id="menuAdmin">⚙️ Admin</button>` : ''}
+    <button class="account-menu-item" id="menuLogout">🚪 Logout</button>
+  `;
+  document.getElementById('menuBadges').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
+  document.getElementById('menuMyPhotos').onclick = () => {
+    document.getElementById('accountMenu').classList.add('hidden');
+    openMyPhotos();
+  };
+  if (currentUser.isAdmin) {
+    document.getElementById('menuAdmin').onclick = () => {
+      document.getElementById('accountMenu').classList.add('hidden');
+      openAdminPanel();
+    };
+  }
+  document.getElementById('menuLogout').onclick = logout;
+}
+
 const DROPDOWNS = {
-  badgesDropdown: 'badgesBtn',
+  accountMenu: 'accountBtn',
+  badgesDropdown: 'accountBtn',
 };
 
 function toggleDropdown(id, onOpen) {
