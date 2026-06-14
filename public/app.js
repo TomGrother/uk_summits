@@ -29,6 +29,12 @@ L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/
   keepBuffer: 2,
 }).addTo(map);
 
+const markerCluster = L.markerClusterGroup({
+  maxClusterRadius: 50,
+  spiderfyOnMaxZoom: true,
+  disableClusteringAtZoom: 13,
+}).addTo(map);
+
 function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -295,7 +301,7 @@ function focusSummit(id) {
   const marker = markers.get(id);
   if (!summit || !marker) return;
   map.setView([summit.lat, summit.lng], Math.max(map.getZoom(), 12));
-  marker.openPopup();
+  markerCluster.zoomToShowLayer(marker, () => marker.openPopup());
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
     setTimeout(() => map.invalidateSize(), 250);
@@ -498,16 +504,17 @@ function iconFor(s) {
 }
 
 function renderMarkers() {
-  markers.forEach(m => map.removeLayer(m));
+  markerCluster.clearLayers();
   markers.clear();
 
   summits.forEach(s => {
-    const marker = L.marker([s.lat, s.lng], { icon: iconFor(s) }).addTo(map);
+    const marker = L.marker([s.lat, s.lng], { icon: iconFor(s) });
 
     marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
     marker.on('popupopen', () => bindPopupActions(s, marker));
     marker.on('mouseover', () => marker.openPopup());
     markers.set(s.id, marker);
+    markerCluster.addLayer(marker);
   });
 }
 
@@ -785,7 +792,7 @@ async function toggleCompletion(id) {
   renderRegionList();
 
   const m = markers.get(id);
-  if (m) m.openPopup();
+  if (m) markerCluster.zoomToShowLayer(m, () => m.openPopup());
 }
 
 // --- Auth modal ---
