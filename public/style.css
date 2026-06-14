@@ -222,7 +222,7 @@ body {
 
 main {
   position: relative;
-  height: calc(100vh - 54px - 36px - 30px);
+  height: calc(100vh - 54px - 36px);
   display: flex;
 }
 
@@ -1152,7 +1152,7 @@ main {
 
   main {
     flex-direction: column;
-    height: calc(100vh - 70px - 56px - 40px);
+    height: calc(100vh - 70px - 56px);
   }
 
   .beta-banner { font-size: 0.72rem; padding: 6px 8px; }
