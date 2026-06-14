@@ -62,7 +62,7 @@ function renderAuthArea() {
 function renderAccountMenu() {
   const list = document.getElementById('accountMenuList');
   list.innerHTML = `
-    <button class="account-menu-item" id="menuBadges">🏆 Badges</button>
+    <button class="account-menu-item" id="menuBadges" data-opens-dropdown>🏆 Badges</button>
     <button class="account-menu-item" id="menuMyPhotos">📷 My Photos</button>
     ${currentUser.isAdmin ? `<button class="account-menu-item" id="menuAdmin">⚙️ Admin</button>` : ''}
     <button class="account-menu-item" id="menuLogout">🚪 Logout</button>
@@ -99,6 +99,7 @@ function toggleDropdown(id, onOpen) {
 }
 
 document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-opens-dropdown]')) return;
   Object.entries(DROPDOWNS).forEach(([id, btnId]) => {
     const dropdown = document.getElementById(id);
     const btn = document.getElementById(btnId);

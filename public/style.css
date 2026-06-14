@@ -1253,6 +1253,10 @@ main {
     font-size: 0.75rem;
   }
 
+  .sidebar.open ~ #progress {
+    display: none;
+  }
+
   .site-footer {
     height: auto;
     flex-direction: column;
