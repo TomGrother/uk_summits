@@ -600,7 +600,7 @@ main {
   letter-spacing: -0.02em;
   color: #fff;
 }
-.welcome-wordmark span {
+.welcome-wordmark span:not(.beta-tag) {
   background: linear-gradient(135deg, #d7ead9, #fff);
   -webkit-background-clip: text;
   background-clip: text;
