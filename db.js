@@ -68,6 +68,19 @@ CREATE TABLE IF NOT EXISTS summit_reviews (
   UNIQUE(summit_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS summit_routes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  summit_id INTEGER NOT NULL REFERENCES summits(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  distance_km REAL,
+  ascent_m REAL,
+  difficulty TEXT,
+  description TEXT,
+  geojson TEXT NOT NULL,
+  source TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_summit_routes_summit ON summit_routes(summit_id);
 CREATE INDEX IF NOT EXISTS idx_summit_reviews_summit ON summit_reviews(summit_id);
 CREATE INDEX IF NOT EXISTS idx_summit_images_summit ON summit_images(summit_id);
 CREATE INDEX IF NOT EXISTS idx_summits_region ON summits(region);

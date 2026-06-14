@@ -556,6 +556,7 @@ function renderMarkers() {
 
     marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
     marker.on('popupopen', () => bindPopupActions(s, marker));
+    marker.on('popupclose', () => clearRouteLines());
     marker.on('mouseover', () => marker.openPopup());
     markers.set(s.id, marker);
     markerCluster.addLayer(marker);
@@ -603,6 +604,7 @@ function popupHtml(s) {
         <div class="summit-reviews-summary" data-reviews="${s.id}">
           <p class="reviews-loading">Loading reviews&hellip;</p>
         </div>
+        <div class="summit-routes" data-routes="${s.id}"></div>
       </div>
     </div>
   `;
@@ -618,6 +620,7 @@ function bindPopupActions(s, marker) {
 
   loadGallery(s.id);
   loadReviews(s.id);
+  loadRoutes(s.id);
 
   const fileInput = document.querySelector(`[data-upload="${s.id}"]`);
   if (fileInput) {
@@ -766,6 +769,65 @@ async function loadReviews(summitId) {
   `;
 
   el.querySelector('[data-read-reviews]').onclick = () => openFullReviews(summits.find(s => s.id === summitId), reviews);
+}
+
+const ROUTE_COLORS = ['#e6550d', '#3182bd', '#31a354', '#9e3cb5', '#e7969c', '#636363', '#1f9e89'];
+let routeLines = [];
+let activeRouteId = null;
+
+function clearRouteLines() {
+  routeLines.forEach(line => map.removeLayer(line));
+  routeLines = [];
+  activeRouteId = null;
+}
+
+async function loadRoutes(summitId) {
+  const el = document.querySelector(`[data-routes="${summitId}"]`);
+  if (!el) return;
+  const res = await fetch(`${API}/summits/${summitId}/routes`);
+  const data = await res.json();
+  if (!el.isConnected) return;
+
+  const routes = data.routes || [];
+  if (!routes.length) {
+    el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = `
+    <h4 class="summit-routes-title">🥾 Walking routes</h4>
+    <div class="route-list">
+      ${routes.map((r, i) => `
+        <button class="route-chip" data-route-id="${r.id}" style="--route-color: ${ROUTE_COLORS[i % ROUTE_COLORS.length]}">
+          ${escapeHtml(r.name)}
+          <span class="route-meta">${r.distance_km ? `${r.distance_km} km` : ''}${r.ascent_m ? ` · ${r.ascent_m}m ascent` : ''}${r.difficulty ? ` · ${r.difficulty}` : ''}</span>
+        </button>
+      `).join('')}
+    </div>
+    <p class="route-description" data-route-desc></p>
+  `;
+
+  el.querySelectorAll('.route-chip').forEach((btn, i) => {
+    btn.onclick = () => {
+      const r = routes[i];
+      const isActive = activeRouteId === r.id;
+      clearRouteLines();
+      el.querySelectorAll('.route-chip').forEach(b => b.classList.remove('active'));
+      const descEl = el.querySelector('[data-route-desc]');
+      if (isActive) {
+        descEl.textContent = '';
+        return;
+      }
+      btn.classList.add('active');
+      activeRouteId = r.id;
+      descEl.textContent = r.description || '';
+
+      const latlngs = r.geojson.coordinates.map(([lng, lat]) => [lat, lng]);
+      const line = L.polyline(latlngs, { color: ROUTE_COLORS[i % ROUTE_COLORS.length], weight: 4, opacity: 0.85 }).addTo(map);
+      routeLines.push(line);
+      map.fitBounds(line.getBounds(), { padding: [40, 40] });
+    };
+  });
 }
 
 function openFullGallery(images) {

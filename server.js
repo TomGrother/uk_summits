@@ -34,6 +34,7 @@ require('./lib/seedMunros').seedMunros();
 require('./lib/seedPeakDistrict').seedPeakDistrict();
 require('./lib/seedYorkshireDales').seedYorkshireDales();
 require('./lib/seedShropshireHills').seedShropshireHills();
+require('./lib/seedSnowdonRoutes').seedSnowdonRoutes();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
