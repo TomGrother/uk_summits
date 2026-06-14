@@ -131,6 +131,7 @@ const CLASSIFICATION_GROUPS = {
   Munro: 'Scottish Munros',
   'Peak District': 'Peak District Hills',
   'Yorkshire Dales': 'Yorkshire Dales Peaks',
+  Shropshire: 'Shropshire Hills',
 };
 
 function renderRegionList() {
