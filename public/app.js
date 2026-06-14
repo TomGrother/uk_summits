@@ -580,7 +580,10 @@ function popupHtml(s) {
       <div class="summit-popup-image">${s.image ? `<img src="${s.image}" alt="${s.name}" loading="lazy" />` : summitImage(s)}</div>
       <div class="summit-popup-body">
         <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
-        ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
+        <div class="summit-links">
+          ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
+          <a class="wiki-link" href="https://explore.osmaps.com/en/map?lat=${s.lat}&lon=${s.lng}&zoom=14&style=Leisure&overlays=" target="_blank" rel="noopener">🗺️ Routes &rarr;</a>
+        </div>
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           <span class="tag">${s.region}</span>

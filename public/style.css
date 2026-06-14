@@ -828,13 +828,18 @@ main {
   font-size: 1.05rem;
   font-weight: 700;
 }
+.summit-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-bottom: 6px;
+}
 .wiki-link {
   display: inline-block;
   font-size: 0.8rem;
   color: var(--accent-dark);
   font-weight: 600;
   text-decoration: none;
-  margin-bottom: 6px;
 }
 .wiki-link:hover { text-decoration: underline; }
 .summit-popup-tags {
