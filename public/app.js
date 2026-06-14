@@ -113,54 +113,96 @@ async function loadSummits() {
 }
 
 const openRegions = new Set();
+const openClassifications = new Set();
 let summitSearchTerm = '';
+
+const CLASSIFICATION_GROUPS = {
+  Nuttall: 'Welsh Nuttalls',
+  Wainwright: 'Lake District Wainwrights',
+};
 
 function renderRegionList() {
   const el = document.getElementById('regionList');
   const term = summitSearchTerm.trim().toLowerCase();
   const searching = term.length > 0;
 
-  const groups = new Map();
+  const classGroups = new Map();
   summits.forEach(s => {
     if (searching && !s.name.toLowerCase().includes(term) && !(s.alt_name || '').toLowerCase().includes(term)) return;
+    const className = CLASSIFICATION_GROUPS[s.classification] || s.classification || 'Other';
     const area = s.area || 'Other';
-    if (!groups.has(area)) groups.set(area, []);
-    groups.get(area).push(s);
+    if (!classGroups.has(className)) classGroups.set(className, new Map());
+    const areaGroups = classGroups.get(className);
+    if (!areaGroups.has(area)) areaGroups.set(area, []);
+    areaGroups.get(area).push(s);
   });
 
-  const sortedAreas = [...groups.keys()].sort();
+  const sortedClasses = [...classGroups.keys()].sort();
 
-  if (searching && sortedAreas.length === 0) {
+  if (searching && sortedClasses.length === 0) {
     el.innerHTML = '<p class="search-empty">No summits match your search.</p>';
     return;
   }
 
-  el.innerHTML = sortedAreas.map(area => {
-    const list = groups.get(area).sort((a, b) => b.height_m - a.height_m);
-    const completed = list.filter(s => s.completed).length;
-    const isOpen = searching || openRegions.has(area);
+  el.innerHTML = sortedClasses.map(className => {
+    const areaGroups = classGroups.get(className);
+    const sortedAreas = [...areaGroups.keys()].sort();
+    const allSummits = sortedAreas.flatMap(area => areaGroups.get(area));
+    const completed = allSummits.filter(s => s.completed).length;
+    const classOpen = searching || openClassifications.has(className);
+
     return `
-      <div class="region-group">
-        <div class="region-header" data-area="${area}">
-          <span>${area}</span>
-          <span class="region-progress">${completed}/${list.length}</span>
+      <div class="classification-group">
+        <div class="classification-header" data-class="${className}">
+          <span>${className}</span>
+          <span class="region-progress">${completed}/${allSummits.length}</span>
         </div>
-        <div class="region-summits ${isOpen ? 'open' : ''}" data-area="${area}">
-          ${list.map(s => `
-            <div class="region-summit" data-id="${s.id}">
-              ${currentUser ? `<input type="checkbox" data-id="${s.id}" ${s.completed ? 'checked' : ''} />` : ''}
-              <span class="summit-name">${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</span>
-              <span class="summit-height">${s.height_m}m</span>
-              <button class="zoom-to-btn" data-zoom-id="${s.id}">Zoom to</button>
-            </div>
-          `).join('')}
+        <div class="classification-areas ${classOpen ? 'open' : ''}" data-class="${className}">
+          ${sortedAreas.map(area => {
+            const list = areaGroups.get(area).sort((a, b) => b.height_m - a.height_m);
+            const areaCompleted = list.filter(s => s.completed).length;
+            const isOpen = searching || openRegions.has(area);
+            return `
+              <div class="region-group">
+                <div class="region-header" data-area="${area}">
+                  <span>${area}</span>
+                  <span class="region-progress">${areaCompleted}/${list.length}</span>
+                </div>
+                <div class="region-summits ${isOpen ? 'open' : ''}" data-area="${area}">
+                  ${list.map(s => `
+                    <div class="region-summit" data-id="${s.id}">
+                      ${currentUser ? `<input type="checkbox" data-id="${s.id}" ${s.completed ? 'checked' : ''} />` : ''}
+                      <span class="summit-name">${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</span>
+                      <span class="summit-height">${s.height_m}m</span>
+                      <button class="zoom-to-btn" data-zoom-id="${s.id}">Zoom to</button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
   }).join('');
 
-  el.querySelectorAll('.region-header').forEach(header => {
+  el.querySelectorAll('.classification-header').forEach(header => {
     header.onclick = () => {
+      const className = header.dataset.class;
+      const body = el.querySelector(`.classification-areas[data-class="${className}"]`);
+      const willOpen = !body.classList.contains('open');
+      body.classList.toggle('open', willOpen);
+      if (willOpen) {
+        openClassifications.add(className);
+      } else {
+        openClassifications.delete(className);
+      }
+    };
+  });
+
+  el.querySelectorAll('.region-header').forEach(header => {
+    header.onclick = (e) => {
+      e.stopPropagation();
       const area = header.dataset.area;
       const body = el.querySelector(`.region-summits[data-area="${area}"]`);
       const willOpen = !body.classList.contains('open');

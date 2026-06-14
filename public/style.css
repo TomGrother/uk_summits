@@ -356,6 +356,38 @@ main {
 }
 .search-empty { padding: 14px; color: var(--text-muted); font-size: 0.9rem; }
 
+.classification-group {
+  margin-bottom: 14px;
+}
+.classification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  transition: background 0.15s ease;
+}
+.classification-header:hover { background: var(--surface); }
+.classification-header .region-progress {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--accent-dark);
+  background: rgba(24, 166, 115, 0.12);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.classification-areas { display: none; }
+.classification-areas.open {
+  display: block;
+  padding-top: 8px;
+}
+
 .region-group {
   background: var(--surface);
   border-radius: var(--radius-sm);
