@@ -75,5 +75,7 @@ app.listen(PORT, () => {
   console.log(`UK Summits server running on http://localhost:${PORT}`);
 });
 
-require('./lib/altNames').backfillAltNames().catch(err => console.error('Alt name backfill failed:', err));
-require('./lib/backfillImages').backfillImages().catch(err => console.error('Image backfill failed:', err));
+require('./lib/altNames').backfillAltNames()
+  .catch(err => console.error('Alt name backfill failed:', err))
+  .then(() => require('./lib/backfillImages').backfillImages())
+  .catch(err => console.error('Image backfill failed:', err));
