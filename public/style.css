@@ -24,6 +24,9 @@
 html, body { overflow-x: hidden; max-width: 100%; }
 body {
   margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -49,6 +52,7 @@ body {
   box-shadow: 0 4px 24px rgba(0,0,0,0.18);
   position: relative;
   z-index: 950;
+  flex-shrink: 0;
 }
 .topbar h1 {
   margin: 0;
@@ -222,12 +226,14 @@ body {
 
 main {
   position: relative;
-  height: calc(100vh - 54px - 36px);
+  flex: 1;
+  min-height: 0;
   display: flex;
 }
 
 .site-footer {
   height: 36px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1152,7 +1158,6 @@ main {
 
   main {
     flex-direction: column;
-    height: calc(100vh - 70px - 56px);
   }
 
   .beta-banner { font-size: 0.72rem; padding: 6px 8px; }
