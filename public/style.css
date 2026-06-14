@@ -68,7 +68,6 @@ body {
   width: 1.5rem;
   height: 1.5rem;
   color: var(--accent);
-  transform: rotate(-8deg);
   transition: transform 0.2s ease;
 }
 .logo svg { width: 100%; height: 100%; }
