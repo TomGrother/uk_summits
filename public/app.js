@@ -17,6 +17,7 @@ const map = L.map('map', {
   zoomSnap: 1,
   wheelDebounceTime: 60,
   fadeAnimation: false,
+  markerZoomAnimation: false,
 }).fitBounds(INITIAL_BOUNDS);
 
 // Esri World Imagery - aerial/satellite tiles of the UK

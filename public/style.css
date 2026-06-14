@@ -750,8 +750,9 @@ main {
   border: 2px solid #fff;
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.35);
   transition: transform 0.15s ease;
+  will-change: transform;
 }
 .summit-marker:hover .summit-pin {
   transform: rotate(-45deg) scale(1.15);
