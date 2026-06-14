@@ -961,6 +961,9 @@ main {
   position: relative;
 }
 .my-photo-thumb img { height: 100px; }
+.my-photos-back {
+  margin-bottom: 8px;
+}
 .my-photo-caption {
   position: absolute;
   bottom: 0;

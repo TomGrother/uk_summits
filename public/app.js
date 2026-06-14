@@ -758,8 +758,14 @@ function openFullGallery(images) {
   document.getElementById('fullGalleryModal').classList.remove('hidden');
 }
 
+let myPhotosBySummit = [];
+
 async function openMyPhotos() {
   const grid = document.getElementById('myPhotosGrid');
+  const title = document.getElementById('myPhotosTitle');
+  const backBtn = document.getElementById('myPhotosBack');
+  title.textContent = 'My Photos';
+  backBtn.classList.add('hidden');
   grid.innerHTML = '<p>Loading...</p>';
   document.getElementById('myPhotosModal').classList.remove('hidden');
 
@@ -771,16 +777,52 @@ async function openMyPhotos() {
     return;
   }
 
-  grid.innerHTML = images.map(img => `
-    <button class="gallery-thumb my-photo-thumb" title="${img.summit_name}">
-      <img src="${img.url}" alt="Photo at ${img.summit_name}" loading="lazy" />
-      <span class="my-photo-caption">${img.summit_name}</span>
+  const bySummit = new Map();
+  images.forEach(img => {
+    if (!bySummit.has(img.summit_id)) bySummit.set(img.summit_id, { summit_id: img.summit_id, summit_name: img.summit_name, images: [] });
+    bySummit.get(img.summit_id).images.push(img);
+  });
+  myPhotosBySummit = [...bySummit.values()].sort((a, b) => a.summit_name.localeCompare(b.summit_name));
+
+  renderMyPhotosTiles();
+}
+
+function renderMyPhotosTiles() {
+  const grid = document.getElementById('myPhotosGrid');
+  const title = document.getElementById('myPhotosTitle');
+  const backBtn = document.getElementById('myPhotosBack');
+  title.textContent = 'My Photos';
+  backBtn.classList.add('hidden');
+
+  grid.innerHTML = myPhotosBySummit.map((entry, i) => `
+    <button class="gallery-thumb my-photo-thumb" title="${entry.summit_name}" data-summit-tile="${i}">
+      <img src="${entry.images[0].url}" alt="Photos at ${entry.summit_name}" loading="lazy" />
+      <span class="my-photo-caption">${entry.summit_name} (${entry.images.length})</span>
+    </button>
+  `).join('');
+  grid.querySelectorAll('[data-summit-tile]').forEach(btn => {
+    btn.onclick = () => renderMyPhotosSummit(myPhotosBySummit[Number(btn.dataset.summitTile)]);
+  });
+}
+
+function renderMyPhotosSummit(entry) {
+  const grid = document.getElementById('myPhotosGrid');
+  const title = document.getElementById('myPhotosTitle');
+  const backBtn = document.getElementById('myPhotosBack');
+  title.textContent = entry.summit_name;
+  backBtn.classList.remove('hidden');
+
+  grid.innerHTML = entry.images.map(img => `
+    <button class="gallery-thumb my-photo-thumb">
+      <img src="${img.url}" alt="Photo at ${entry.summit_name}" loading="lazy" />
     </button>
   `).join('');
   grid.querySelectorAll('.my-photo-thumb').forEach((btn, i) => {
-    btn.onclick = () => openLightbox(images, i);
+    btn.onclick = () => openLightbox(entry.images, i);
   });
 }
+
+document.getElementById('myPhotosBack').onclick = () => renderMyPhotosTiles();
 
 let lightboxImages = [];
 let lightboxIndex = 0;
