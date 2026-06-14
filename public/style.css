@@ -986,7 +986,7 @@ main {
 .my-photo-thumb {
   position: relative;
 }
-.my-photo-thumb img {
+.full-gallery-grid .my-photo-thumb img {
   height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
