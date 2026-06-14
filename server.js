@@ -32,6 +32,7 @@ const reviewRoutes = require('./routes/reviews');
 require('./lib/seedWainwrights').seedWainwrights();
 require('./lib/seedMunros').seedMunros();
 require('./lib/seedPeakDistrict').seedPeakDistrict();
+require('./lib/seedYorkshireDales').seedYorkshireDales();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

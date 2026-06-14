@@ -130,6 +130,7 @@ const CLASSIFICATION_GROUPS = {
   Wainwright: 'Lake District Wainwrights',
   Munro: 'Scottish Munros',
   'Peak District': 'Peak District Hills',
+  'Yorkshire Dales': 'Yorkshire Dales Peaks',
 };
 
 function renderRegionList() {
@@ -491,6 +492,7 @@ const CLASS_COLORS = {
   Yorkshire: '#9b6eb5',
   Shropshire: '#b56e7a',
   'Peak District': '#c9a13b',
+  'Yorkshire Dales': '#5ba38a',
 };
 
 function classColor(classification) {
