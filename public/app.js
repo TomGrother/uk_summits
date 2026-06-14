@@ -122,6 +122,7 @@ let summitSearchTerm = '';
 const CLASSIFICATION_GROUPS = {
   Nuttall: 'Welsh Nuttalls',
   Wainwright: 'Lake District Wainwrights',
+  Munro: 'Scottish Munros',
 };
 
 function renderRegionList() {

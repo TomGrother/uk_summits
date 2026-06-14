@@ -30,6 +30,7 @@ const reviewRoutes = require('./routes/reviews');
 })();
 
 require('./lib/seedWainwrights').seedWainwrights();
+require('./lib/seedMunros').seedMunros();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
