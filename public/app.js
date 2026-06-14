@@ -44,8 +44,10 @@ function renderAuthArea() {
   const el = document.getElementById('authArea');
   if (currentUser) {
     navEl.innerHTML = `<button class="secondary nav-btn" id="badgesBtn">Badges</button>`
+      + `<button class="secondary nav-btn" id="myPhotosBtn">My Photos</button>`
       + (currentUser.isAdmin ? `<button class="secondary nav-btn" id="adminBtn">Admin</button>` : '');
     document.getElementById('badgesBtn').onclick = () => toggleDropdown('badgesDropdown', loadMyBadges);
+    document.getElementById('myPhotosBtn').onclick = () => openMyPhotos();
     if (currentUser.isAdmin) {
       document.getElementById('adminBtn').onclick = () => openAdminPanel();
     }
@@ -756,6 +758,30 @@ function openFullGallery(images) {
   document.getElementById('fullGalleryModal').classList.remove('hidden');
 }
 
+async function openMyPhotos() {
+  const grid = document.getElementById('myPhotosGrid');
+  grid.innerHTML = '<p>Loading...</p>';
+  document.getElementById('myPhotosModal').classList.remove('hidden');
+
+  const res = await fetch('/api/summits/my-images', { headers: authHeaders() });
+  const { images } = await res.json();
+
+  if (!images.length) {
+    grid.innerHTML = '<p>You haven\'t uploaded any photos yet. Add one from a summit popup on the map!</p>';
+    return;
+  }
+
+  grid.innerHTML = images.map(img => `
+    <button class="gallery-thumb my-photo-thumb" title="${img.summit_name}">
+      <img src="${img.url}" alt="Photo at ${img.summit_name}" loading="lazy" />
+      <span class="my-photo-caption">${img.summit_name}</span>
+    </button>
+  `).join('');
+  grid.querySelectorAll('.my-photo-thumb').forEach((btn, i) => {
+    btn.onclick = () => openLightbox(images, i);
+  });
+}
+
 let lightboxImages = [];
 let lightboxIndex = 0;
 
@@ -769,7 +795,9 @@ function openLightbox(images, index) {
 function renderLightbox() {
   const img = lightboxImages[lightboxIndex];
   document.getElementById('lightboxImage').src = img.url;
-  document.getElementById('lightboxCaption').textContent = `Photo by ${img.username} (${lightboxIndex + 1}/${lightboxImages.length})`;
+  document.getElementById('lightboxCaption').textContent = img.summit_name
+    ? `${img.summit_name} (${lightboxIndex + 1}/${lightboxImages.length})`
+    : `Photo by ${img.username} (${lightboxIndex + 1}/${lightboxImages.length})`;
   const multi = lightboxImages.length > 1;
   document.getElementById('lightboxPrev').classList.toggle('hidden', !multi);
   document.getElementById('lightboxNext').classList.toggle('hidden', !multi);

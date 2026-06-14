@@ -957,6 +957,24 @@ main {
   height: 44px;
   object-fit: cover;
 }
+.my-photo-thumb {
+  position: relative;
+}
+.my-photo-thumb img { height: 100px; }
+.my-photo-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 4px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .popup-upload-btn {
   display: block;
   margin-top: 8px;

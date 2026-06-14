@@ -29,6 +29,19 @@ const upload = multer({
   },
 });
 
+// List all images uploaded by the current user, with summit info.
+router.get('/my-images', requireAuth, (req, res) => {
+  const images = db.prepare(`
+    SELECT si.id, si.filename, si.created_at, si.summit_id, s.name AS summit_name
+    FROM summit_images si
+    JOIN summits s ON s.id = si.summit_id
+    WHERE si.user_id = ?
+    ORDER BY si.created_at DESC
+  `).all(req.user.id);
+
+  res.json({ images: images.map(i => ({ ...i, url: `/uploads/${i.filename}` })) });
+});
+
 // List images for a summit, including uploader username.
 router.get('/:id/images', requireAuth, (req, res) => {
   const images = db.prepare(`
