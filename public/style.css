@@ -986,7 +986,11 @@ main {
 .my-photo-thumb {
   position: relative;
 }
-.my-photo-thumb img { height: 100px; }
+.my-photo-thumb img {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
 .my-photos-back {
   margin-bottom: 8px;
 }
