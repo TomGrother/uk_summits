@@ -1,3 +1,9 @@
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 const API = '/api';
 let token = localStorage.getItem('token');
 let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
@@ -403,12 +409,12 @@ function renderAdminUserList(filter) {
 
   body.innerHTML = `
     <div class="admin-search">
-      <input type="text" id="adminUserSearch" placeholder="Search users..." value="${filter}" />
+      <input type="text" id="adminUserSearch" placeholder="Search users..." value="${escapeHtml(filter)}" />
     </div>
     <div class="admin-users">
       ${filtered.length ? filtered.map(u => `
         <button class="admin-user-row" data-select-user="${u.id}">
-          <span class="admin-user-name">${u.username}${u.isAdmin ? ' 👑' : ''}</span>
+          <span class="admin-user-name">${escapeHtml(u.username)}${u.isAdmin ? ' 👑' : ''}</span>
           <span class="admin-user-progress">${u.completed} climbed</span>
         </button>
       `).join('') : '<p class="search-empty">No users found.</p>'}
@@ -437,10 +443,10 @@ function renderAdminUserEdit() {
     <button class="link-btn admin-back-btn" data-back>&larr; Back to users</button>
     <div class="admin-user-edit" data-edit="${u.id}">
       <label>Username
-        <input type="text" name="username" value="${u.username}" />
+        <input type="text" name="username" value="${escapeHtml(u.username)}" />
       </label>
       <label>Email
-        <input type="email" name="email" value="${u.email}" />
+        <input type="email" name="email" value="${escapeHtml(u.email)}" />
       </label>
       <label class="admin-checkbox">
         <input type="checkbox" name="isAdmin" ${u.isAdmin ? 'checked' : ''} ${u.id === currentUser.id ? 'disabled' : ''} />
@@ -653,8 +659,8 @@ async function loadGallery(summitId) {
   el.innerHTML = `
     <div class="gallery-grid">
       ${preview.map(img => `
-        <button class="gallery-thumb" data-lightbox-src="${img.url}" data-lightbox-by="${img.username}" title="By ${img.username}">
-          <img src="${img.url}" alt="Photo by ${img.username}" loading="lazy" />
+        <button class="gallery-thumb" data-lightbox-src="${img.url}" data-lightbox-by="${escapeHtml(img.username)}" title="By ${escapeHtml(img.username)}">
+          <img src="${img.url}" alt="Photo by ${escapeHtml(img.username)}" loading="lazy" />
         </button>
       `).join('')}
     </div>
@@ -676,9 +682,9 @@ function renderReviewRow(r) {
     <div class="review-row">
       <div class="review-row-head">
         <span class="review-stars">${starString(r.rating)}</span>
-        <span class="review-author">${r.username}</span>
+        <span class="review-author">${escapeHtml(r.username)}</span>
       </div>
-      ${r.body ? `<p class="review-body">${r.body}</p>` : ''}
+      ${r.body ? `<p class="review-body">${escapeHtml(r.body)}</p>` : ''}
     </div>
   `;
 }
@@ -695,7 +701,7 @@ function openFullReviews(summit, reviews) {
         <select name="rating">
           ${[5, 4, 3, 2, 1].map(n => `<option value="${n}" ${myReview && myReview.rating === n ? 'selected' : ''}>${starString(n)}</option>`).join('')}
         </select>
-        <textarea name="body" placeholder="Share your thoughts on this summit..." maxlength="1000">${myReview ? myReview.body : ''}</textarea>
+        <textarea name="body" placeholder="Share your thoughts on this summit..." maxlength="1000">${myReview ? escapeHtml(myReview.body) : ''}</textarea>
         <div class="review-form-actions">
           <button type="submit" class="popup-btn">${myReview ? 'Update review' : 'Post review'}</button>
           ${myReview ? '<button type="button" class="review-delete-btn" data-delete-review>Delete</button>' : ''}
@@ -764,8 +770,8 @@ async function loadReviews(summitId) {
 function openFullGallery(images) {
   const grid = document.getElementById('fullGalleryGrid');
   grid.innerHTML = images.map(img => `
-    <button class="gallery-thumb" title="By ${img.username}">
-      <img src="${img.url}" alt="Photo by ${img.username}" loading="lazy" />
+    <button class="gallery-thumb" title="By ${escapeHtml(img.username)}">
+      <img src="${img.url}" alt="Photo by ${escapeHtml(img.username)}" loading="lazy" />
     </button>
   `).join('');
   grid.querySelectorAll('.gallery-thumb').forEach((btn, i) => {
