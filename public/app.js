@@ -169,7 +169,21 @@ function renderRegionList() {
           <span class="region-progress">${completed}/${allSummits.length}</span>
         </div>
         <div class="classification-areas ${classOpen ? 'open' : ''}" data-class="${className}">
-          ${sortedAreas.map(area => {
+          ${sortedAreas.length === 1 ? (() => {
+            const list = areaGroups.get(sortedAreas[0]).sort((a, b) => b.height_m - a.height_m);
+            return `
+              <div class="region-summits open" data-area="${sortedAreas[0]}">
+                ${list.map(s => `
+                  <div class="region-summit" data-id="${s.id}">
+                    ${currentUser ? `<input type="checkbox" data-id="${s.id}" ${s.completed ? 'checked' : ''} />` : ''}
+                    <span class="summit-name">${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</span>
+                    <span class="summit-height">${s.height_m}m</span>
+                    <button class="zoom-to-btn" data-zoom-id="${s.id}">Zoom to</button>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+          })() : sortedAreas.map(area => {
             const list = areaGroups.get(area).sort((a, b) => b.height_m - a.height_m);
             const areaCompleted = list.filter(s => s.completed).length;
             const isOpen = searching || openRegions.has(area);
