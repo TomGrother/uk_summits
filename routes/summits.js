@@ -58,4 +58,75 @@ router.delete('/:id/complete', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// Weather cache: summitId -> { data, fetchedAt }
+const weatherCache = new Map();
+const WEATHER_TTL_MS = 30 * 60 * 1000;
+
+const WEATHER_CODES = {
+  0: { label: 'Clear sky', icon: '☀️' },
+  1: { label: 'Mainly clear', icon: '🌤️' },
+  2: { label: 'Partly cloudy', icon: '⛅' },
+  3: { label: 'Overcast', icon: '☁️' },
+  45: { label: 'Fog', icon: '🌫️' },
+  48: { label: 'Fog', icon: '🌫️' },
+  51: { label: 'Light drizzle', icon: '🌦️' },
+  53: { label: 'Drizzle', icon: '🌦️' },
+  55: { label: 'Dense drizzle', icon: '🌦️' },
+  61: { label: 'Light rain', icon: '🌧️' },
+  63: { label: 'Rain', icon: '🌧️' },
+  65: { label: 'Heavy rain', icon: '🌧️' },
+  71: { label: 'Light snow', icon: '🌨️' },
+  73: { label: 'Snow', icon: '🌨️' },
+  75: { label: 'Heavy snow', icon: '🌨️' },
+  77: { label: 'Snow grains', icon: '🌨️' },
+  80: { label: 'Light showers', icon: '🌦️' },
+  81: { label: 'Showers', icon: '🌦️' },
+  82: { label: 'Heavy showers', icon: '🌧️' },
+  85: { label: 'Snow showers', icon: '🌨️' },
+  86: { label: 'Heavy snow showers', icon: '🌨️' },
+  95: { label: 'Thunderstorm', icon: '⛈️' },
+  96: { label: 'Thunderstorm with hail', icon: '⛈️' },
+  99: { label: 'Thunderstorm with hail', icon: '⛈️' },
+};
+
+// Current weather for a summit (proxied + cached to avoid hammering Open-Meteo).
+router.get('/:id/weather', async (req, res) => {
+  const summit = db.prepare('SELECT id, lat, lng, height_m FROM summits WHERE id = ?').get(req.params.id);
+  if (!summit) return res.status(404).json({ error: 'Summit not found' });
+
+  const cached = weatherCache.get(summit.id);
+  if (cached && Date.now() - cached.fetchedAt < WEATHER_TTL_MS) {
+    return res.json(cached.data);
+  }
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${summit.lat}&longitude=${summit.lng}` +
+      `&current=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,weather_code` +
+      `&elevation=${summit.height_m}&wind_speed_unit=mph&timezone=auto`;
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Open-Meteo responded ${response.status}`);
+    const json = await response.json();
+    const current = json.current || {};
+    const code = current.weather_code;
+    const info = WEATHER_CODES[code] || { label: 'Unknown', icon: '❓' };
+
+    const data = {
+      temperature: Math.round(current.temperature_2m),
+      feelsLike: Math.round(current.apparent_temperature),
+      windSpeed: Math.round(current.wind_speed_10m),
+      windGusts: Math.round(current.wind_gusts_10m),
+      label: info.label,
+      icon: info.icon,
+    };
+
+    weatherCache.set(summit.id, { data, fetchedAt: Date.now() });
+    res.json(data);
+  } catch (err) {
+    console.error('Weather fetch failed:', err.message);
+    if (cached) return res.json(cached.data);
+    res.status(502).json({ error: 'Weather unavailable' });
+  }
+});
+
 module.exports = router;

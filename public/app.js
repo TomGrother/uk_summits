@@ -591,6 +591,9 @@ function popupHtml(s) {
                ${s.completed ? '✓ Climbed' : 'Mark as climbed'}
              </button>`
           : '<p class="popup-hint">Login to track this summit</p>'}
+        <div class="summit-weather" data-weather="${s.id}">
+          <p class="weather-loading">Loading weather&hellip;</p>
+        </div>
         <div class="summit-gallery" data-gallery="${s.id}">
           <p class="gallery-loading">Loading photos&hellip;</p>
         </div>
@@ -616,6 +619,7 @@ function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
 
+  loadWeather(s.id);
   loadGallery(s.id);
   loadReviews(s.id);
 
@@ -639,6 +643,24 @@ function bindPopupActions(s, marker) {
       }
       fileInput.value = '';
     };
+  }
+}
+
+async function loadWeather(summitId) {
+  const el = document.querySelector(`[data-weather="${summitId}"]`);
+  if (!el) return;
+  try {
+    const res = await fetch(`${API}/summits/${summitId}/weather`);
+    if (!el.isConnected) return;
+    if (!res.ok) throw new Error('Weather unavailable');
+    const w = await res.json();
+    el.innerHTML = `
+      <span class="weather-icon">${w.icon}</span>
+      <span class="weather-temp">${w.temperature}&deg;C</span>
+      <span class="weather-detail">Feels ${w.feelsLike}&deg;C &middot; ${w.label} &middot; ${w.windSpeed}mph wind (gusts ${w.windGusts}mph)</span>
+    `;
+  } catch {
+    if (el.isConnected) el.innerHTML = '';
   }
 }
 

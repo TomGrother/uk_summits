@@ -871,6 +871,23 @@ main {
 .popup-btn.is-done { background: var(--primary-gradient); }
 .popup-hint { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
 
+.summit-weather:empty { display: none; }
+.summit-weather {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  font-size: 0.8rem;
+}
+.weather-loading { color: var(--text-muted); font-size: 0.8rem; }
+.weather-icon { font-size: 1.1rem; }
+.weather-temp { font-weight: 700; }
+.weather-detail { color: var(--text-muted); font-size: 0.75rem; flex-basis: 100%; }
+
 .summit-gallery { margin-top: 10px; }
 
 .summit-reviews-summary { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
