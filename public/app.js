@@ -468,10 +468,7 @@ function popupHtml(s) {
       <div class="summit-popup-image">${s.image ? `<img src="${s.image}" alt="${s.name}" loading="lazy" />` : summitImage(s)}</div>
       <div class="summit-popup-body">
         <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
-        <div class="summit-popup-links">
-          ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-          <a class="trails-link" href="https://www.alltrails.com/search?q=${encodeURIComponent(s.name)}" target="_blank" rel="noopener">Find paths &rarr;</a>
-        </div>
+        ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           <span class="tag">${s.region}</span>

@@ -656,8 +656,7 @@ main {
 }
 .preview-popup .popup-btn,
 .preview-popup .popup-upload-btn,
-.preview-popup .wiki-link,
-.preview-popup .trails-link { pointer-events: none; }
+.preview-popup .wiki-link { pointer-events: none; }
 .preview-thumb {
   display: flex;
   align-items: center;
@@ -744,22 +743,15 @@ main {
   font-size: 1.05rem;
   font-weight: 700;
 }
-.summit-popup-links {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
-}
-.wiki-link,
-.trails-link {
+.wiki-link {
   display: inline-block;
   font-size: 0.8rem;
   color: var(--accent-dark);
   font-weight: 600;
   text-decoration: none;
+  margin-bottom: 6px;
 }
-.wiki-link:hover,
-.trails-link:hover { text-decoration: underline; }
+.wiki-link:hover { text-decoration: underline; }
 .summit-popup-tags {
   display: flex;
   flex-wrap: wrap;
