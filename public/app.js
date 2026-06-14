@@ -10,6 +10,7 @@ const MAP_BOUNDS = L.latLngBounds([51.3, -5.6], [55.1, -2.6]);
 
 const map = L.map('map', {
   maxBounds: MAP_BOUNDS.pad(0.15),
+  maxBoundsViscosity: 1.0,
   minZoom: 7,
   tap: true,
   zoomSnap: 1,
