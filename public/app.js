@@ -951,7 +951,39 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const tab = btn.dataset.tab;
     document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
     document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
+    document.getElementById('forgotForm').classList.add('hidden');
   };
+});
+
+document.getElementById('showForgotPassword').onclick = () => {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('registerForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.remove('hidden');
+  document.getElementById('forgotSuccess').classList.add('hidden');
+  document.getElementById('forgotError').textContent = '';
+};
+
+document.getElementById('backToLogin').onclick = () => {
+  document.getElementById('forgotForm').classList.add('hidden');
+  document.querySelector('.tab-btn[data-tab="login"]').click();
+};
+
+document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const errEl = document.getElementById('forgotError');
+  const successEl = document.getElementById('forgotSuccess');
+  errEl.textContent = '';
+  try {
+    await fetch(`${API}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.get('email') }),
+    });
+  } catch {}
+  successEl.classList.remove('hidden');
+  e.target.reset();
 });
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {

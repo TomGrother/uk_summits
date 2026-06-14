@@ -35,6 +35,14 @@ router.post('/register', authLimiter, (req, res) => {
   res.json({ token, user: { id: result.lastInsertRowid, username, isAdmin: false } });
 });
 
+// TODO: hook up to resend.com to actually send a reset email.
+router.post('/forgot-password', authLimiter, (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+  // Always respond with ok to avoid leaking which emails are registered.
+  res.json({ ok: true });
+});
+
 router.post('/login', authLimiter, (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'Username and password are required' });

@@ -301,6 +301,11 @@
   <div id="authModal" class="modal hidden">
     <div class="modal-content">
       <button class="close-btn" id="closeAuth">&times;</button>
+      <div class="auth-hero">
+        <div class="auth-hero-emoji">🏔️</div>
+        <h2 class="auth-hero-title">Welcome to SummitStack</h2>
+        <p class="auth-hero-tagline">Log in to track your summits</p>
+      </div>
       <div class="tabs">
         <button class="tab-btn active" data-tab="login">Login</button>
         <button class="tab-btn" data-tab="register">Register</button>
@@ -310,6 +315,7 @@
         <input name="username" placeholder="Username or email" required />
         <input name="password" type="password" placeholder="Password" required />
         <button type="submit">Login</button>
+        <button type="button" class="link-btn auth-forgot-link" id="showForgotPassword">Forgot password?</button>
         <p class="error" id="loginError"></p>
       </form>
 
@@ -320,6 +326,15 @@
         <p class="hint">8+ characters, with an uppercase letter, lowercase letter, number and symbol.</p>
         <button type="submit">Create account</button>
         <p class="error" id="registerError"></p>
+      </form>
+
+      <form id="forgotForm" class="auth-form hidden">
+        <p class="auth-forgot-intro">Enter your account email and we'll send you a link to reset your password.</p>
+        <input name="email" type="email" placeholder="Email" required />
+        <button type="submit">Send reset link</button>
+        <button type="button" class="link-btn auth-forgot-link" id="backToLogin">&larr; Back to login</button>
+        <p class="error" id="forgotError"></p>
+        <p class="success hidden" id="forgotSuccess">If an account exists for that email, a reset link is on its way.</p>
       </form>
     </div>
   </div>
