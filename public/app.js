@@ -779,7 +779,17 @@ async function openMyPhotos() {
 
   const bySummit = new Map();
   images.forEach(img => {
-    if (!bySummit.has(img.summit_id)) bySummit.set(img.summit_id, { summit_id: img.summit_id, summit_name: img.summit_name, images: [] });
+    if (!bySummit.has(img.summit_id)) {
+      const summit = summits.find(s => s.id === img.summit_id);
+      bySummit.set(img.summit_id, {
+        summit_id: img.summit_id,
+        summit_name: img.summit_name,
+        classification: summit ? summit.classification : null,
+        area: summit ? summit.area : null,
+        height_m: summit ? summit.height_m : null,
+        images: [],
+      });
+    }
     bySummit.get(img.summit_id).images.push(img);
   });
   myPhotosBySummit = [...bySummit.values()].sort((a, b) => a.summit_name.localeCompare(b.summit_name));
@@ -791,15 +801,29 @@ function renderMyPhotosTiles() {
   const grid = document.getElementById('myPhotosGrid');
   const title = document.getElementById('myPhotosTitle');
   const backBtn = document.getElementById('myPhotosBack');
-  title.textContent = 'My Photos';
+  title.textContent = `My Photos (${myPhotosBySummit.length} summit${myPhotosBySummit.length === 1 ? '' : 's'})`;
   backBtn.classList.add('hidden');
+  grid.classList.add('my-photos-summit-grid');
 
-  grid.innerHTML = myPhotosBySummit.map((entry, i) => `
-    <button class="gallery-thumb my-photo-thumb" title="${entry.summit_name}" data-summit-tile="${i}">
-      <img src="${entry.images[0].url}" alt="Photos at ${entry.summit_name}" loading="lazy" />
-      <span class="my-photo-caption">${entry.summit_name} (${entry.images.length})</span>
-    </button>
-  `).join('');
+  grid.innerHTML = myPhotosBySummit.map((entry, i) => {
+    const color = CLASS_COLORS[entry.classification] || '#888';
+    return `
+      <button class="my-photo-card" data-summit-tile="${i}">
+        <div class="my-photo-card-img">
+          <img src="${entry.images[0].url}" alt="Photos at ${entry.summit_name}" loading="lazy" />
+          <span class="my-photo-count">${entry.images.length} photo${entry.images.length === 1 ? '' : 's'}</span>
+        </div>
+        <div class="my-photo-card-body">
+          <strong class="my-photo-name">${entry.summit_name}</strong>
+          <div class="my-photo-tags">
+            ${entry.classification ? `<span class="tag tag-class" style="background:${color}">${entry.classification}</span>` : ''}
+            ${entry.height_m ? `<span class="tag">${entry.height_m} m</span>` : ''}
+          </div>
+          ${entry.area ? `<span class="my-photo-area">${entry.area}</span>` : ''}
+        </div>
+      </button>
+    `;
+  }).join('');
   grid.querySelectorAll('[data-summit-tile]').forEach(btn => {
     btn.onclick = () => renderMyPhotosSummit(myPhotosBySummit[Number(btn.dataset.summitTile)]);
   });
@@ -809,17 +833,27 @@ function renderMyPhotosSummit(entry) {
   const grid = document.getElementById('myPhotosGrid');
   const title = document.getElementById('myPhotosTitle');
   const backBtn = document.getElementById('myPhotosBack');
-  title.textContent = entry.summit_name;
+  const color = CLASS_COLORS[entry.classification] || '#888';
+  title.innerHTML = `${entry.summit_name} `
+    + (entry.classification ? `<span class="tag tag-class" style="background:${color}">${entry.classification}</span>` : '')
+    + (entry.height_m ? ` <span class="tag">${entry.height_m} m</span>` : '');
   backBtn.classList.remove('hidden');
+  grid.classList.remove('my-photos-summit-grid');
 
   grid.innerHTML = entry.images.map(img => `
     <button class="gallery-thumb my-photo-thumb">
       <img src="${img.url}" alt="Photo at ${entry.summit_name}" loading="lazy" />
     </button>
-  `).join('');
+  `).join('')
+  + `<button class="secondary my-photo-zoom" data-zoom-summit="${entry.summit_id}">📍 Show on map</button>`;
+
   grid.querySelectorAll('.my-photo-thumb').forEach((btn, i) => {
     btn.onclick = () => openLightbox(entry.images, i);
   });
+  grid.querySelector('[data-zoom-summit]').onclick = () => {
+    document.getElementById('myPhotosModal').classList.add('hidden');
+    focusSummit(entry.summit_id);
+  };
 }
 
 document.getElementById('myPhotosBack').onclick = () => renderMyPhotosTiles();
