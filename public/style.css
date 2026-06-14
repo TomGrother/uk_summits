@@ -1156,18 +1156,18 @@ main {
 @media (max-width: 768px) {
   .topbar {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto 1fr;
     align-items: center;
-    column-gap: 6px;
-    row-gap: 6px;
+    column-gap: 8px;
     padding: 8px 10px;
   }
-  .topbar h1 { font-size: 1.05rem; grid-column: 1 / -1; grid-row: 1; }
-  .sidebar-toggle { display: inline-block; grid-column: 1; grid-row: 2; }
+  .topbar h1 { font-size: 1rem; grid-column: 2; grid-row: 1; white-space: nowrap; min-width: 0; overflow: hidden; }
+  .topbar h1 .beta-tag { display: none; }
+  .sidebar-toggle { display: inline-block; grid-column: 1; grid-row: 1; }
 
   .auth-area {
-    grid-column: 2 / -1;
-    grid-row: 2;
+    grid-column: 3;
+    grid-row: 1;
     margin-left: 0;
     display: flex;
     align-items: center;
@@ -1178,14 +1178,7 @@ main {
   .auth-area .welcome { margin-right: 0; white-space: nowrap; }
 
   .nav-area {
-    grid-column: 3;
-    grid-row: 2;
-    margin-left: 0;
-    margin-right: 0;
-    justify-content: flex-end;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    min-width: 0;
+    display: none;
   }
   .nav-btn, .auth-area button {
     padding: 5px 8px;
