@@ -484,27 +484,41 @@ function summitImage(s) {
   `;
 }
 
+function iconFor(s) {
+  const color = s.completed ? '#2e7d32' : '#c0392b';
+  return L.divIcon({
+    className: 'summit-marker',
+    html: `<div class="summit-pin" style="--pin-color:${color}"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 20],
+    popupAnchor: [0, -18],
+  });
+}
+
 function renderMarkers() {
   markers.forEach(m => map.removeLayer(m));
   markers.clear();
 
   summits.forEach(s => {
-    const color = s.completed ? '#2e7d32' : '#c0392b';
-    const icon = L.divIcon({
-      className: 'summit-marker',
-      html: `<div class="summit-pin" style="--pin-color:${color}"></div>`,
-      iconSize: [22, 22],
-      iconAnchor: [11, 20],
-      popupAnchor: [0, -18],
-    });
-
-    const marker = L.marker([s.lat, s.lng], { icon }).addTo(map);
+    const marker = L.marker([s.lat, s.lng], { icon: iconFor(s) }).addTo(map);
 
     marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
     marker.on('popupopen', () => bindPopupActions(s, marker));
     marker.on('mouseover', () => marker.openPopup());
     markers.set(s.id, marker);
   });
+}
+
+// Updates a single marker in place (icon colour + popup content) instead of
+// re-rendering all markers, which is expensive on mobile.
+function updateMarker(id) {
+  const summit = summits.find(s => s.id === id);
+  const marker = markers.get(id);
+  if (!summit || !marker) return;
+
+  marker.setIcon(iconFor(summit));
+  marker.setPopupContent(popupHtml(summit));
+  bindPopupActions(summit, marker);
 }
 
 function popupHtml(s) {
@@ -764,7 +778,7 @@ async function toggleCompletion(id) {
   });
 
   summit.completed = !summit.completed;
-  renderMarkers();
+  updateMarker(id);
   renderProgress();
   renderRegionList();
 
