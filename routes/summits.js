@@ -103,7 +103,7 @@ router.get('/:id/weather', async (req, res) => {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${summit.lat}&longitude=${summit.lng}` +
       `&current=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,weather_code` +
       `&hourly=temperature_2m,weather_code,precipitation_probability` +
-      `&elevation=${summit.height_m}&wind_speed_unit=mph&timezone=auto&forecast_days=1`;
+      `&elevation=${summit.height_m}&wind_speed_unit=mph&timezone=auto&forecast_days=2`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Open-Meteo responded ${response.status}`);
@@ -117,8 +117,9 @@ router.get('/:id/weather', async (req, res) => {
     let startIdx = (hourly.time || []).findIndex(t => t > nowIso);
     if (startIdx === -1) startIdx = 0;
 
-    const forecast = (hourly.time || []).slice(startIdx, startIdx + 4).map((time, i) => {
-      const idx = startIdx + i;
+    const forecast = [0, 2, 4, 6].map(offset => {
+      const idx = startIdx + offset;
+      const time = hourly.time[idx];
       const hCode = hourly.weather_code[idx];
       const hInfo = WEATHER_CODES[hCode] || { label: 'Unknown', icon: '❓' };
       return {
