@@ -4,17 +4,18 @@ let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 let summits = [];
 let markers = new Map();
 
-// Wales bounding box, with a little padding so border summits aren't clipped
-const WALES_BOUNDS = L.latLngBounds([51.3, -5.6], [53.5, -2.6]);
+// Bounding box covering Wales and the Lake District, with a little padding
+// so border summits aren't clipped
+const MAP_BOUNDS = L.latLngBounds([51.3, -5.6], [55.1, -2.6]);
 
 const map = L.map('map', {
-  maxBounds: WALES_BOUNDS.pad(0.15),
-  minZoom: 8,
+  maxBounds: MAP_BOUNDS.pad(0.15),
+  minZoom: 7,
   tap: true,
   zoomSnap: 1,
   wheelDebounceTime: 60,
   fadeAnimation: false,
-}).fitBounds(WALES_BOUNDS);
+}).fitBounds(MAP_BOUNDS);
 
 // Esri World Imagery - aerial/satellite tiles of the UK
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {

@@ -29,6 +29,8 @@ const reviewRoutes = require('./routes/reviews');
   console.log(`Seeded ${summits.length} summits`);
 })();
 
+require('./lib/seedWainwrights').seedWainwrights();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
