@@ -149,4 +149,35 @@ router.get('/:id/weather', async (req, res) => {
   }
 });
 
+// Wikipedia extract cache: summitId -> { data, fetchedAt }
+const wikiCache = new Map();
+const WIKI_TTL_MS = 24 * 60 * 60 * 1000;
+
+// Short intro text from a summit's Wikipedia article, if it has one.
+router.get('/:id/wiki-summary', async (req, res) => {
+  const summit = db.prepare('SELECT id, wiki FROM summits WHERE id = ?').get(req.params.id);
+  if (!summit) return res.status(404).json({ error: 'Summit not found' });
+  if (!summit.wiki) return res.json({ extract: null });
+
+  const cached = wikiCache.get(summit.id);
+  if (cached && Date.now() - cached.fetchedAt < WIKI_TTL_MS) {
+    return res.json(cached.data);
+  }
+
+  try {
+    const title = decodeURIComponent(summit.wiki.split('/').pop());
+    const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'SummitStack/1.0' } });
+    if (!response.ok) throw new Error(`Wikipedia responded ${response.status}`);
+    const json = await response.json();
+    const data = { extract: json.extract || null };
+    wikiCache.set(summit.id, { data, fetchedAt: Date.now() });
+    res.json(data);
+  } catch (err) {
+    console.error('Wikipedia summary fetch failed:', err.message);
+    if (cached) return res.json(cached.data);
+    res.json({ extract: null });
+  }
+});
+
 module.exports = router;

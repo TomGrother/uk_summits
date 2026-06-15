@@ -624,7 +624,7 @@ function summitDetailBody(s, opts = {}) {
   return `
     <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
     <div class="summit-links">
-      ${s.wiki ? `<a class="${linkClass}" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
+      ${!opts.desktop && s.wiki ? `<a class="${linkClass}" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
       <a class="${linkClass}" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">${navLabel}</a>
     </div>
     <div class="summit-popup-tags">
@@ -632,6 +632,11 @@ function summitDetailBody(s, opts = {}) {
       <span class="tag">${s.region}</span>
       ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
     </div>
+    ${opts.desktop && s.wiki ? `
+      <div class="summit-wiki-extract" data-wiki="${s.id}">
+        <p class="wiki-extract-loading">Loading summary&hellip;</p>
+      </div>
+    ` : ''}
     ${currentUser
       ? `<button class="popup-btn ${s.completed ? 'is-done' : ''}" data-action="toggle" data-id="${s.id}">
            ${s.completed ? '✓ Climbed' : 'Mark as climbed'}
@@ -699,6 +704,27 @@ function openDetailPanel(s) {
   panel.classList.add('open');
   panel.querySelector('.detail-close').onclick = closeDetailPanel;
   bindPopupActions(s, markers.get(s.id));
+  if (s.wiki) loadWikiSummary(s);
+}
+
+async function loadWikiSummary(s) {
+  const el = document.querySelector(`[data-wiki="${s.id}"]`);
+  if (!el) return;
+  try {
+    const res = await fetch(`${API}/summits/${s.id}/wiki-summary`);
+    if (!el.isConnected) return;
+    const data = await res.json();
+    if (!data.extract) {
+      el.innerHTML = '';
+      return;
+    }
+    el.innerHTML = `
+      <p class="wiki-extract-text">${escapeHtml(data.extract)}</p>
+      <a class="wiki-continue-link" href="${s.wiki}" target="_blank" rel="noopener">Continue on Wikipedia &rarr;</a>
+    `;
+  } catch {
+    if (el.isConnected) el.innerHTML = '';
+  }
 }
 
 function closeDetailPanel() {

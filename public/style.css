@@ -864,6 +864,28 @@ main {
   text-overflow: ellipsis;
 }
 .detail-panel .link-btn:hover { background: rgba(24, 166, 115, 0.08); text-decoration: none; }
+
+.summit-wiki-extract { margin-top: 10px; }
+.wiki-extract-loading { color: var(--text-muted); font-size: 0.8rem; }
+.wiki-extract-text {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+}
+.wiki-continue-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  text-decoration: none;
+}
+.wiki-continue-link:hover { text-decoration: underline; }
 .detail-close {
   position: absolute;
   top: 8px;
