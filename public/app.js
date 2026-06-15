@@ -610,7 +610,7 @@ function renderMarkers() {
         bindPopupActions(s, marker);
         setTimeout(() => {
           const point = map.project(marker.getLatLng(), map.getZoom());
-          const target = point.subtract([0, map.getSize().y / 2 - 140]);
+          const target = point.subtract([0, map.getSize().y / 2 - 40]);
           map.setView(map.unproject(target, map.getZoom()), map.getZoom(), { animate: true });
         }, 0);
       });
