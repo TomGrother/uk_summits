@@ -167,16 +167,21 @@ router.get('/:id/wiki-summary', async (req, res) => {
   try {
     const title = decodeURIComponent(summit.wiki.split('/').pop());
     const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
-    const response = await fetch(url, { headers: { 'User-Agent': 'SummitStack/1.0' } });
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'SummitStack/1.0 (https://uksummits-production.up.railway.app; contact via GitHub TomGrother/uk_summits)',
+        Accept: 'application/json',
+      },
+    });
     if (!response.ok) throw new Error(`Wikipedia responded ${response.status}`);
     const json = await response.json();
     const data = { extract: json.extract || null };
     wikiCache.set(summit.id, { data, fetchedAt: Date.now() });
     res.json(data);
   } catch (err) {
-    console.error('Wikipedia summary fetch failed:', err.message);
+    console.error('Wikipedia summary fetch failed for', summit.wiki, ':', err.message);
     if (cached) return res.json(cached.data);
-    res.json({ extract: null });
+    res.json({ extract: null, error: err.message });
   }
 });
 
