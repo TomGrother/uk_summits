@@ -90,6 +90,7 @@ app.listen(PORT, () => {
 require('./lib/altNames').backfillAltNames()
   .catch(err => console.error('Alt name backfill failed:', err))
   .then(() => require('./lib/backfillImages').backfillImages())
-  .catch(err => console.error('Image backfill failed:', err))
-  .then(() => require('./lib/backfillTrailheads').backfillTrailheads())
+  .catch(err => console.error('Image backfill failed:', err));
+
+require('./lib/backfillTrailheads').backfillTrailheads()
   .catch(err => console.error('Trailhead backfill failed:', err));
