@@ -100,6 +100,7 @@ function renderAccountMenu() {
   list.innerHTML = `
     <button class="account-menu-item" id="menuBadges" data-opens-dropdown>🏆 Badges</button>
     <button class="account-menu-item" id="menuMyPhotos">📷 My Photos</button>
+    <button class="account-menu-item" id="menuMyPlan">📌 My Plan</button>
     ${currentUser.isAdmin ? `<button class="account-menu-item" id="menuAdmin">⚙️ Admin</button>` : ''}
     <button class="account-menu-item" id="menuLogout">🚪 Logout</button>
   `;
@@ -107,6 +108,10 @@ function renderAccountMenu() {
   document.getElementById('menuMyPhotos').onclick = () => {
     document.getElementById('accountMenu').classList.add('hidden');
     openMyPhotos();
+  };
+  document.getElementById('menuMyPlan').onclick = () => {
+    document.getElementById('accountMenu').classList.add('hidden');
+    openMyPlan();
   };
   if (currentUser.isAdmin) {
     document.getElementById('menuAdmin').onclick = () => {
@@ -632,12 +637,11 @@ function updateMarker(id) {
 
 function summitDetailBody(s, opts = {}) {
   const linkClass = opts.desktop ? 'wiki-link link-btn' : 'wiki-link';
-  const navLabel = opts.desktop ? '🧭 Open in Google Maps' : '🧭 Navigate &rarr;';
   return `
     <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
     <div class="summit-links">
       ${!opts.desktop && s.wiki ? `<a class="${linkClass}" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-      <a class="${linkClass}" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">${navLabel}</a>
+      ${currentUser ? `<button class="${linkClass}" data-action="add-to-plan" data-id="${s.id}">📌 Add to My Plan</button>` : ''}
     </div>
     <div class="summit-popup-tags">
       <span class="tag">${s.height_m} m</span>
@@ -752,6 +756,9 @@ function starString(rating) {
 function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
+
+  const planBtn = document.querySelector(`[data-action="add-to-plan"][data-id="${s.id}"]`);
+  if (planBtn) planBtn.onclick = () => openPlanPinModal(s);
 
   loadWeather(s.id);
   loadGallery(s.id);
@@ -1072,6 +1079,86 @@ function renderMyPhotosSummit(entry) {
 }
 
 document.getElementById('myPhotosBack').onclick = () => renderMyPhotosTiles();
+
+// ---- My Plan (pin-drop + Google Maps navigation) ----
+
+let planPinMap = null;
+let planPinMarker = null;
+
+function openPlanPinModal(s) {
+  document.getElementById('planPinTitle').textContent = `Add ${s.name} to My Plan`;
+  document.getElementById('planPinModal').classList.remove('hidden');
+
+  const pinLat = s.plan_pin_lat || s.lat;
+  const pinLng = s.plan_pin_lng || s.lng;
+
+  if (!planPinMap) {
+    planPinMap = L.map('planPinMap', { attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(planPinMap);
+  }
+
+  planPinMap.setView([pinLat, pinLng], 14);
+  if (planPinMarker) planPinMap.removeLayer(planPinMarker);
+  planPinMarker = L.marker([pinLat, pinLng], { draggable: true }).addTo(planPinMap);
+
+  planPinMap.on('click', (e) => planPinMarker.setLatLng(e.latlng));
+
+  // Leaflet needs a size recalc once the modal (and its map div) becomes visible.
+  setTimeout(() => planPinMap.invalidateSize(), 50);
+
+  document.getElementById('planPinSave').onclick = async () => {
+    const { lat, lng } = planPinMarker.getLatLng();
+    const res = await fetch(`${API}/summits/plan`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ summit_id: s.id, pin_lat: lat, pin_lng: lng }),
+    });
+    if (res.ok) {
+      document.getElementById('planPinModal').classList.add('hidden');
+    } else {
+      alert('Failed to save to My Plan');
+    }
+  };
+}
+
+async function openMyPlan() {
+  const list = document.getElementById('myPlanList');
+  list.innerHTML = '<p>Loading...</p>';
+  document.getElementById('myPlanModal').classList.remove('hidden');
+
+  const res = await fetch(`${API}/summits/plan`, { headers: authHeaders() });
+  const { items } = await res.json();
+
+  if (!items.length) {
+    list.innerHTML = '<p>Your plan is empty. Add a summit from its map popup with "Add to My Plan".</p>';
+    return;
+  }
+
+  list.innerHTML = items.map(item => `
+    <div class="my-plan-item">
+      <div class="my-plan-item-body">
+        <strong>${item.name}</strong>
+        <div class="summit-popup-tags">
+          ${item.classification ? `<span class="tag tag-class">${item.classification}</span>` : ''}
+          ${item.height_m ? `<span class="tag">${item.height_m} m</span>` : ''}
+        </div>
+      </div>
+      <div class="my-plan-item-actions">
+        <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.pin_lat},${item.pin_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
+        <button class="secondary" data-remove-plan="${item.summit_id}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-remove-plan]').forEach(btn => {
+    btn.onclick = async () => {
+      await fetch(`${API}/summits/plan/${btn.dataset.removePlan}`, { method: 'DELETE', headers: authHeaders() });
+      openMyPlan();
+    };
+  });
+}
 
 let lightboxImages = [];
 let lightboxIndex = 0;

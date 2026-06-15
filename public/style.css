@@ -1467,3 +1467,39 @@ main {
   .welcome-content .welcome-actions { margin-left: 16px; margin-right: 16px; }
 }
 
+.plan-pin-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 4px 0 12px;
+}
+
+.plan-pin-map {
+  width: 100%;
+  height: 320px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+.my-plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.my-plan-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.my-plan-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+

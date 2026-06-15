@@ -68,6 +68,17 @@ CREATE TABLE IF NOT EXISTS summit_reviews (
   UNIQUE(summit_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS plan_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  summit_id INTEGER NOT NULL REFERENCES summits(id) ON DELETE CASCADE,
+  pin_lat REAL NOT NULL,
+  pin_lng REAL NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(user_id, summit_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_items_user ON plan_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_summit_reviews_summit ON summit_reviews(summit_id);
 CREATE INDEX IF NOT EXISTS idx_summit_images_summit ON summit_images(summit_id);
 CREATE INDEX IF NOT EXISTS idx_summits_region ON summits(region);

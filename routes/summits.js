@@ -182,4 +182,43 @@ router.get('/:id/wiki-summary', async (req, res) => {
   }
 });
 
+// Get the logged-in user's plan (summits with a saved pin location).
+router.get('/plan', requireAuth, (req, res) => {
+  const items = db.prepare(`
+    SELECT p.summit_id, p.pin_lat, p.pin_lng, p.created_at,
+           s.name, s.classification, s.area, s.height_m, s.image
+    FROM plan_items p
+    JOIN summits s ON s.id = p.summit_id
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC
+  `).all(req.user.id);
+  res.json({ items });
+});
+
+// Add (or update) a summit in the logged-in user's plan with a pin location.
+router.post('/plan', requireAuth, (req, res) => {
+  const { summit_id, pin_lat, pin_lng } = req.body || {};
+  const summit = db.prepare('SELECT id FROM summits WHERE id = ?').get(summit_id);
+  if (!summit) return res.status(404).json({ error: 'Summit not found' });
+
+  const lat = Number(pin_lat);
+  const lng = Number(pin_lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return res.status(400).json({ error: 'Invalid pin location' });
+  }
+
+  db.prepare(`
+    INSERT INTO plan_items (user_id, summit_id, pin_lat, pin_lng) VALUES (?, ?, ?, ?)
+    ON CONFLICT(user_id, summit_id) DO UPDATE SET pin_lat = excluded.pin_lat, pin_lng = excluded.pin_lng
+  `).run(req.user.id, summit.id, lat, lng);
+
+  res.json({ ok: true });
+});
+
+// Remove a summit from the logged-in user's plan.
+router.delete('/plan/:id', requireAuth, (req, res) => {
+  db.prepare('DELETE FROM plan_items WHERE user_id = ? AND summit_id = ?').run(req.user.id, req.params.id);
+  res.json({ ok: true });
+});
+
 module.exports = router;
