@@ -33,7 +33,7 @@ const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/
   detectRetina: true,
   updateWhenZooming: false,
   keepBuffer: 2,
-}).addTo(map);
+});
 
 // OpenTopoMap - contour lines and hiking paths
 const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
@@ -51,7 +51,7 @@ const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.
   detectRetina: true,
   updateWhenZooming: false,
   keepBuffer: 2,
-});
+}).addTo(map);
 
 L.control.layers({
   'Satellite': satelliteLayer,
