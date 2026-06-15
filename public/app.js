@@ -605,8 +605,11 @@ function renderMarkers() {
       marker.on('mouseout', () => marker.closePopup());
       marker.on('click', () => { marker.closePopup(); openDetailPanel(s); });
     } else {
-      marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
-      marker.on('popupopen', () => bindPopupActions(s, marker));
+      marker.bindPopup(popupHtml(s), { minWidth: 240, maxWidth: 280, autoPan: true, autoPanPadding: [20, 20], className: 'summit-popup-wrapper' });
+      marker.on('popupopen', () => {
+        bindPopupActions(s, marker);
+        setTimeout(() => map.setView(marker.getLatLng(), map.getZoom(), { animate: true }), 0);
+      });
       marker.on('mouseover', () => marker.openPopup());
     }
     markers.set(s.id, marker);
