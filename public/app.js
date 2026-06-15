@@ -618,8 +618,8 @@ function updateMarker(id) {
   }
 }
 
-// Pilot: only Ben Nevis has trailhead-to-summit routing enabled.
-const ROUTE_ENABLED_SUMMITS = new Set([2036]);
+// Pilot: trailhead-to-summit routing enabled for Ben Nevis and Snowdon.
+const ROUTE_ENABLED_SUMMITS = new Set([2036, 1633]);
 let routeLine = null;
 let routeMarker = null;
 let routeIndex = 0;
