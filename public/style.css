@@ -1464,7 +1464,7 @@ main {
 
   .leaflet-popup-content { width: 200px !important; }
 
-  .summit-links { gap: 4px 6px; }
+  .summit-links { flex-direction: column; align-items: flex-start; gap: 4px 6px; }
   .wiki-link { font-size: 0.72rem; }
 
   .topbar h1 { min-width: 0; }
