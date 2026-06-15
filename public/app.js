@@ -603,7 +603,11 @@ function renderMarkers() {
       marker.bindPopup(hoverPopupHtml(s), { minWidth: 160, className: 'summit-popup-wrapper summit-popup-hover', closeButton: false, autoPan: false });
       marker.on('mouseover', () => marker.openPopup());
       marker.on('mouseout', () => marker.closePopup());
-      marker.on('click', () => { marker.closePopup(); openDetailPanel(s); });
+      marker.on('click', () => {
+        marker.closePopup();
+        openDetailPanel(s);
+        map.panTo(marker.getLatLng(), { animate: true });
+      });
     } else {
       marker.bindPopup(popupHtml(s), { minWidth: 240, maxWidth: 280, autoPan: true, autoPanPadding: [20, 20], className: 'summit-popup-wrapper' });
       marker.on('popupopen', () => {
