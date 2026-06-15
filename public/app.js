@@ -1291,8 +1291,8 @@ async function openMyPlan() {
 }
 
 function showSavedRoute(item) {
-  clearRoute();
   setRoutePlanning(false);
+  clearRoute();
 
   routeStartMarker = L.marker([item.start_lat, item.start_lng], { title: 'Start' }).addTo(map);
   routeEndMarker = L.marker([item.end_lat, item.end_lng], { title: 'End' }).addTo(map);
