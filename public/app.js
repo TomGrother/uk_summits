@@ -606,7 +606,9 @@ function renderMarkers() {
       marker.on('click', () => {
         marker.closePopup();
         openDetailPanel(s);
-        map.panTo(marker.getLatLng(), { animate: true });
+        const point = map.project(marker.getLatLng(), map.getZoom());
+        const target = point.subtract([170, 0]);
+        map.panTo(map.unproject(target, map.getZoom()), { animate: true });
       });
     } else {
       marker.bindPopup(popupHtml(s), { minWidth: 240, maxWidth: 280, autoPan: true, autoPanPadding: [20, 20], className: 'summit-popup-wrapper' });
