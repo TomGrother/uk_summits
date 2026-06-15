@@ -1346,6 +1346,8 @@ main {
 
 /* ================= Mobile ================= */
 @media (max-width: 768px) {
+  .summit-weather { display: none !important; }
+
   .topbar {
     display: grid;
     grid-template-columns: auto auto 1fr;
