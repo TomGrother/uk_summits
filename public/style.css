@@ -1468,9 +1468,10 @@ main {
 }
 
 .leaflet-bottom.leaflet-left {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-end !important;
   gap: 8px;
 }
 
