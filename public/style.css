@@ -509,7 +509,7 @@ main {
   bottom: 64px;
   right: 14px;
   z-index: 500;
-  padding: 10px 14px;
+  padding: 10px 32px 10px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -521,6 +521,18 @@ main {
   font-weight: 600;
 }
 .route-info p { margin: 0; }
+.route-info-dismiss {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: none;
+  background: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+}
 
 .progress {
   position: absolute;
