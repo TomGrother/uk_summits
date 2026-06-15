@@ -847,17 +847,21 @@ main {
 .detail-panel .summit-popup-image img,
 .detail-panel .summit-popup-image svg { height: 160px; }
 .detail-panel .summit-popup-body { padding: 14px 16px 16px; }
-.detail-panel .summit-links { gap: 8px; flex-wrap: wrap; }
+.detail-panel .summit-links { gap: 8px; flex-wrap: nowrap; }
 .detail-panel .link-btn {
   display: inline-flex;
   align-items: center;
-  font-size: 0.9rem;
+  justify-content: center;
+  flex: 1 1 0;
+  font-size: 0.85rem;
   font-weight: 600;
-  padding: 8px 14px;
+  padding: 8px 10px;
   border-radius: var(--radius-sm);
   background: var(--bg);
   border: 1px solid var(--border);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .detail-panel .link-btn:hover { background: rgba(24, 166, 115, 0.08); text-decoration: none; }
 .detail-close {
