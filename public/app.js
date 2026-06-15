@@ -608,7 +608,11 @@ function renderMarkers() {
       marker.bindPopup(popupHtml(s), { minWidth: 240, maxWidth: 280, autoPan: true, autoPanPadding: [20, 20], className: 'summit-popup-wrapper' });
       marker.on('popupopen', () => {
         bindPopupActions(s, marker);
-        setTimeout(() => map.setView(marker.getLatLng(), map.getZoom(), { animate: true }), 0);
+        setTimeout(() => {
+          const point = map.project(marker.getLatLng(), map.getZoom());
+          const target = point.subtract([0, map.getSize().y / 2 - 80]);
+          map.setView(map.unproject(target, map.getZoom()), map.getZoom(), { animate: true });
+        }, 0);
       });
       marker.on('mouseover', () => marker.openPopup());
     }
