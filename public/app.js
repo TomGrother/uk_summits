@@ -443,6 +443,7 @@ map.on('click', async (e) => {
     const infoEl = document.getElementById('routeInfo');
     const textEl = document.getElementById('routeInfoText');
     infoEl.classList.remove('hidden');
+    document.getElementById('routeInfoClear').classList.remove('hidden');
     textEl.textContent = 'Finding route...';
 
     try {
@@ -1307,6 +1308,8 @@ function showSavedRoute(item) {
   const infoEl = document.getElementById('routeInfo');
   const textEl = document.getElementById('routeInfoText');
   infoEl.classList.remove('hidden');
+  document.getElementById('routeInfoSave').classList.add('hidden');
+  document.getElementById('routeInfoClear').classList.add('hidden');
   textEl.textContent = item.name
     ? `${item.name} — ${formatRouteSummary(item.distance_km || 0, item.duration_min || 0)}`
     : formatRouteSummary(item.distance_km || 0, item.duration_min || 0);
