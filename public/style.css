@@ -505,6 +505,7 @@ main {
 }
 
 .route-info.hidden { display: none; }
+.route-info .hidden { display: none; }
 .route-info {
   position: absolute;
   bottom: 64px;
