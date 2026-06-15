@@ -111,6 +111,8 @@ for (const col of ['route_start_lat', 'route_start_lng', 'route_start_name', 'ro
   }
 }
 
+db.prepare("UPDATE summits SET area = 'Brecon Beacons' WHERE name = 'Cefn yr Ystrad' AND area = 'Cambrian Mountains'").run();
+
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
 if (!userColumns.includes('is_admin')) {
   db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0');
