@@ -846,7 +846,9 @@ main {
 .detail-panel.open { transform: translateX(0); }
 .detail-panel .summit-popup-image img,
 .detail-panel .summit-popup-image svg { height: 160px; }
-.detail-panel .summit-popup-body { padding: 14px 16px 16px; }
+.detail-panel .summit-popup-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+.detail-panel .summit-popup-body > * { margin: 0; }
+.detail-panel h3 { font-size: 1.3rem; }
 .detail-panel .summit-links { gap: 8px; flex-wrap: nowrap; }
 .detail-panel .link-btn {
   display: inline-flex;
