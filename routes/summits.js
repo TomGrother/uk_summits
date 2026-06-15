@@ -149,19 +149,15 @@ router.get('/:id/weather', async (req, res) => {
   }
 });
 
-// Wikipedia extract cache: summitId -> { data, fetchedAt }
-const wikiCache = new Map();
-const WIKI_TTL_MS = 24 * 60 * 60 * 1000;
-
 // Short intro text from a summit's Wikipedia article, if it has one.
+// Fetched once and stored on the summit row; re-fetch only if wiki_extract is cleared.
 router.get('/:id/wiki-summary', async (req, res) => {
-  const summit = db.prepare('SELECT id, wiki FROM summits WHERE id = ?').get(req.params.id);
+  const summit = db.prepare('SELECT id, wiki, wiki_extract FROM summits WHERE id = ?').get(req.params.id);
   if (!summit) return res.status(404).json({ error: 'Summit not found' });
   if (!summit.wiki) return res.json({ extract: null });
 
-  const cached = wikiCache.get(summit.id);
-  if (cached && Date.now() - cached.fetchedAt < WIKI_TTL_MS) {
-    return res.json(cached.data);
+  if (summit.wiki_extract) {
+    return res.json({ extract: summit.wiki_extract });
   }
 
   try {
@@ -175,12 +171,13 @@ router.get('/:id/wiki-summary', async (req, res) => {
     });
     if (!response.ok) throw new Error(`Wikipedia responded ${response.status}`);
     const json = await response.json();
-    const data = { extract: json.extract || null };
-    wikiCache.set(summit.id, { data, fetchedAt: Date.now() });
-    res.json(data);
+    const extract = json.extract || null;
+    if (extract) {
+      db.prepare('UPDATE summits SET wiki_extract = ? WHERE id = ?').run(extract, summit.id);
+    }
+    res.json({ extract });
   } catch (err) {
     console.error('Wikipedia summary fetch failed for', summit.wiki, ':', err.message);
-    if (cached) return res.json(cached.data);
     res.json({ extract: null, error: err.message });
   }
 });

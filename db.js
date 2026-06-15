@@ -91,6 +91,9 @@ if (!summitColumns.includes('image')) {
 if (!summitColumns.includes('alt_name')) {
   db.exec('ALTER TABLE summits ADD COLUMN alt_name TEXT');
 }
+if (!summitColumns.includes('wiki_extract')) {
+  db.exec('ALTER TABLE summits ADD COLUMN wiki_extract TEXT');
+}
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
 if (!userColumns.includes('is_admin')) {
