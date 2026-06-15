@@ -523,15 +523,20 @@ main {
 .route-info p { margin: 0; }
 .route-info-dismiss {
   position: absolute;
-  top: 4px;
-  right: 6px;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: none;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   line-height: 1;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 2px;
+  padding: 0;
 }
 
 .progress {

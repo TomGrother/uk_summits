@@ -1272,7 +1272,7 @@ async function openMyPlan() {
       <div class="my-plan-item-actions">
         <button class="secondary" data-open-route="${item.id}">🗺️ Show route</button>
         <div class="my-plan-item-links">
-          <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.end_lat},${item.end_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
+          <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.start_lat},${item.start_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
           <button class="secondary" data-remove-plan="${item.id}">Remove</button>
         </div>
       </div>
