@@ -618,12 +618,14 @@ function updateMarker(id) {
   }
 }
 
-function summitDetailBody(s) {
+function summitDetailBody(s, opts = {}) {
+  const linkClass = opts.desktop ? 'wiki-link link-btn' : 'wiki-link';
+  const navLabel = opts.desktop ? '🧭 Open in Google Maps' : '🧭 Navigate &rarr;';
   return `
     <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
     <div class="summit-links">
-      ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-      <a class="wiki-link" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">🧭 Navigate &rarr;</a>
+      ${s.wiki ? `<a class="${linkClass}" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
+      <a class="${linkClass}" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">${navLabel}</a>
     </div>
     <div class="summit-popup-tags">
       <span class="tag">${s.height_m} m</span>
@@ -692,7 +694,7 @@ function openDetailPanel(s) {
   panel.innerHTML = `
     <button class="detail-close" aria-label="Close details">&times;</button>
     <div class="summit-popup-image">${summitImageHtml(s)}</div>
-    <div class="summit-popup-body">${summitDetailBody(s)}</div>
+    <div class="summit-popup-body">${summitDetailBody(s, { desktop: true })}</div>
   `;
   panel.classList.add('open');
   panel.querySelector('.detail-close').onclick = closeDetailPanel;
