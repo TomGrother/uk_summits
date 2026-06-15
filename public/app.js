@@ -606,7 +606,7 @@ function popupHtml(s) {
         <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
         <div class="summit-links">
           ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-          <a class="wiki-link" href="https://opentopomap.org/#map=14/${s.lat}/${s.lng}" target="_blank" rel="noopener">🗺️ Routes &rarr;</a>
+          <a class="wiki-link" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">🧭 Navigate &rarr;</a>
         </div>
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
