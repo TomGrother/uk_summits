@@ -383,10 +383,16 @@ function focusSummit(id) {
   const summit = summits.find(s => s.id === id);
   const marker = markers.get(id);
   if (!summit || !marker) return;
-  map.setView([summit.lat, summit.lng], Math.max(map.getZoom(), 12));
   if (isDesktopView()) {
-    markerCluster.zoomToShowLayer(marker, () => openDetailPanel(summit));
+    const zoom = Math.max(map.getZoom(), 12);
+    const point = map.project([summit.lat, summit.lng], zoom).add([170, 0]);
+    map.setView(map.unproject(point, zoom), zoom);
+    markerCluster.zoomToShowLayer(marker, () => {
+      openDetailPanel(summit);
+      setActiveSummit(summit.id);
+    });
   } else {
+    map.setView([summit.lat, summit.lng], Math.max(map.getZoom(), 12));
     markerCluster.zoomToShowLayer(marker, () => marker.openPopup());
   }
   if (window.innerWidth <= 768) {
