@@ -404,9 +404,7 @@ document.getElementById('routePlanBtn').onclick = () => {
 
 document.getElementById('routeInfoClear').onclick = () => clearRoute();
 
-document.getElementById('routeInfoDismiss').onclick = () => {
-  document.getElementById('routeInfo').classList.add('hidden');
-};
+document.getElementById('routeInfoDismiss').onclick = () => clearRoute();
 
 document.getElementById('routeInfoSave').onclick = async () => {
   if (!currentRouteData) return;
