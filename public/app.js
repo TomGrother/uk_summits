@@ -607,7 +607,7 @@ function renderMarkers() {
         marker.closePopup();
         openDetailPanel(s);
         const point = map.project(marker.getLatLng(), map.getZoom());
-        const target = point.subtract([170, 0]);
+        const target = point.add([170, 0]);
         map.panTo(map.unproject(target, map.getZoom()), { animate: true });
       });
     } else {
