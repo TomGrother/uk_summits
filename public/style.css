@@ -794,7 +794,7 @@ main {
 .welcome-actions button.secondary:hover { background: rgba(24, 166, 115, 0.08); }
 
 /* --- Summit markers --- */
-.summit-marker { background: none; border: none; }
+.summit-marker { background: none; border: none; position: relative; }
 .summit-pin {
   width: 18px;
   height: 18px;
@@ -811,12 +811,40 @@ main {
 }
 
 .summit-marker-active .summit-pin {
-  transform: rotate(-45deg) scale(1.35);
-  box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.55), 0 1px 3px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25);
+  transform: rotate(-45deg) scale(1.5);
+  box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.75), 0 1px 3px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25);
   z-index: 1000;
+  animation: summit-pin-pulse 1.1s ease-in-out infinite;
 }
 .summit-marker-active:hover .summit-pin {
-  transform: rotate(-45deg) scale(1.35);
+  transform: rotate(-45deg) scale(1.5);
+}
+
+.summit-marker-active {
+  z-index: 1000 !important;
+}
+.summit-marker-active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  background: rgba(255, 213, 79, 0.45);
+  animation: summit-ring-pulse 1.1s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes summit-pin-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 213, 79, 0.75), 0 1px 3px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 213, 79, 0.35), 0 1px 3px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.25); }
+}
+
+@keyframes summit-ring-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.8); opacity: 0; }
 }
 
 /* --- Marker cluster contrast against light/green map styles --- */
