@@ -618,36 +618,52 @@ function updateMarker(id) {
   }
 }
 
-// Pilot: only Ben Nevis has car-park-to-summit routing enabled.
+// Pilot: only Ben Nevis has trailhead-to-summit routing enabled.
 const ROUTE_ENABLED_SUMMITS = new Set([2036]);
 let routeLine = null;
 let routeMarker = null;
+let routeIndex = 0;
 
 function clearRouteLine() {
   if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
   if (routeMarker) { map.removeLayer(routeMarker); routeMarker = null; }
 }
 
-async function findRoute(s) {
+async function findRoute(s, index = 0) {
   const el = document.querySelector(`[data-route="${s.id}"]`);
   if (!el) return;
+  routeIndex = index;
   el.innerHTML = '<p class="route-loading">Finding route&hellip;</p>';
 
   try {
-    const res = await fetch(`${API}/summits/${s.id}/route`);
+    const res = await fetch(`${API}/summits/${s.id}/route?index=${index}`);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Route lookup failed');
     if (!el.isConnected) return;
 
+    const cycleControls = data.total > 1 ? `
+      <div class="route-cycle">
+        <button class="route-cycle-btn" data-route-prev="${s.id}" ${data.index === 0 ? 'disabled' : ''}>&larr;</button>
+        <span>Route ${data.index + 1} of ${data.total}</span>
+        <button class="route-cycle-btn" data-route-next="${s.id}" ${data.index === data.total - 1 ? 'disabled' : ''}>&rarr;</button>
+      </div>
+    ` : '';
+
     el.innerHTML = `
-      <p class="route-summary">🥾 ${data.distanceKm} km from ${escapeHtml(data.parking.name)} &middot; ~${data.durationMin} min</p>
+      <p class="route-summary">🥾 ${data.distanceKm} km &middot; ~${data.durationMin} min</p>
+      ${cycleControls}
     `;
+
+    const prevBtn = el.querySelector(`[data-route-prev="${s.id}"]`);
+    const nextBtn = el.querySelector(`[data-route-next="${s.id}"]`);
+    if (prevBtn) prevBtn.onclick = () => findRoute(s, data.index - 1);
+    if (nextBtn) nextBtn.onclick = () => findRoute(s, data.index + 1);
 
     clearRouteLine();
     const latlngs = data.geojson.coordinates.map(([lng, lat]) => [lat, lng]);
     routeLine = L.polyline(latlngs, { color: '#e6550d', weight: 4, opacity: 0.85 }).addTo(map);
-    routeMarker = L.marker([data.parking.lat, data.parking.lng], {
-      icon: L.divIcon({ className: 'parking-marker', html: '🅿️', iconSize: [22, 22] }),
+    routeMarker = L.marker([data.start.lat, data.start.lng], {
+      icon: L.divIcon({ className: 'parking-marker', html: '🚶', iconSize: [22, 22] }),
     }).addTo(map);
     map.fitBounds(routeLine.getBounds(), { padding: [60, 60] });
   } catch (err) {
@@ -671,7 +687,7 @@ function summitDetailBody(s, opts = {}) {
     </div>
     ${ROUTE_ENABLED_SUMMITS.has(s.id) ? `
       <div class="summit-route" data-route="${s.id}">
-        <button class="popup-btn route-find-btn" data-find-route="${s.id}">🥾 Find route from car park</button>
+        <button class="popup-btn route-find-btn" data-find-route="${s.id}">🥾 Find route to summit</button>
       </div>
     ` : ''}
     ${opts.desktop && s.wiki ? `

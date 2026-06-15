@@ -103,6 +103,9 @@ if (!summitColumns.includes('route_start_lng')) {
 if (!summitColumns.includes('route_start_name')) {
   db.exec('ALTER TABLE summits ADD COLUMN route_start_name TEXT');
 }
+if (!summitColumns.includes('route_starts')) {
+  db.exec('ALTER TABLE summits ADD COLUMN route_starts TEXT');
+}
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
 if (!userColumns.includes('is_admin')) {

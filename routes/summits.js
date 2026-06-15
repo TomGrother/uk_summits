@@ -182,27 +182,35 @@ router.get('/:id/wiki-summary', async (req, res) => {
   }
 });
 
-// Walking route from the nearest car park to the summit (pilot: Ben Nevis only).
-// The car park location is pre-computed offline (lib/backfillTrailheads.js) and
-// stored on the summit row, since Overpass is too unreliable for on-demand requests.
+// Walking routes from nearby trailheads (where a footpath meets a driving road)
+// to the summit (pilot: Ben Nevis only). Trailhead points are pre-computed
+// offline (lib/backfillTrailheads.js) and stored on the summit row, since
+// Overpass is too unreliable for on-demand requests; only ORS is called live.
 const routeCache = new Map();
 
 router.get('/:id/route', async (req, res) => {
-  const summit = db.prepare('SELECT id, lat, lng, route_start_lat, route_start_lng, route_start_name FROM summits WHERE id = ?').get(req.params.id);
+  const summit = db.prepare('SELECT id, lat, lng, route_starts FROM summits WHERE id = ?').get(req.params.id);
   if (!summit) return res.status(404).json({ error: 'Summit not found' });
-  if (summit.route_start_lat == null || summit.route_start_lng == null) {
-    return res.status(404).json({ error: 'Routing not available for this summit' });
-  }
-  const parkingSpot = { lat: summit.route_start_lat, lng: summit.route_start_lng, name: summit.route_start_name };
 
-  const cached = routeCache.get(summit.id);
+  let trailheads = [];
+  try {
+    trailheads = summit.route_starts ? JSON.parse(summit.route_starts) : [];
+  } catch {
+    trailheads = [];
+  }
+  if (!trailheads.length) return res.status(404).json({ error: 'Routing not available for this summit' });
+
+  const index = Math.max(0, Math.min(trailheads.length - 1, parseInt(req.query.index, 10) || 0));
+  const start = trailheads[index];
+
+  const cacheKey = `${summit.id}:${index}`;
+  const cached = routeCache.get(cacheKey);
   if (cached) return res.json(cached);
 
   const orsKey = process.env.ORS_API_KEY;
   if (!orsKey) return res.status(503).json({ error: 'Routing not configured' });
 
   try {
-    // Route from car park to summit using ORS foot-hiking profile.
     const orsRes = await fetch('https://api.openrouteservice.org/v2/directions/foot-hiking/geojson', {
       method: 'POST',
       headers: {
@@ -210,7 +218,7 @@ router.get('/:id/route', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        coordinates: [[parkingSpot.lng, parkingSpot.lat], [summit.lng, summit.lat]],
+        coordinates: [[start.lng, start.lat], [summit.lng, summit.lat]],
       }),
     });
     if (!orsRes.ok) {
@@ -222,12 +230,14 @@ router.get('/:id/route', async (req, res) => {
     if (!feature) throw new Error('No route returned');
 
     const data = {
-      parking: { lat: parkingSpot.lat, lng: parkingSpot.lng, name: parkingSpot.name },
+      index,
+      total: trailheads.length,
+      start: { lat: start.lat, lng: start.lng },
       geojson: feature.geometry,
       distanceKm: Math.round((feature.properties.summary.distance / 1000) * 10) / 10,
       durationMin: Math.round(feature.properties.summary.duration / 60),
     };
-    routeCache.set(summit.id, data);
+    routeCache.set(cacheKey, data);
     res.json(data);
   } catch (err) {
     console.error('Route lookup failed:', err.message);

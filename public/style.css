@@ -873,6 +873,14 @@ main {
 .route-summary { font-size: 0.85rem; font-weight: 600; margin: 6px 0 0; }
 .parking-marker { font-size: 1.1rem; text-align: center; }
 
+.route-cycle { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; font-size: 0.8rem; color: var(--text-muted); }
+.route-cycle-btn {
+  border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius-sm);
+  width: 24px; height: 24px; line-height: 1; cursor: pointer; font-size: 0.85rem;
+}
+.route-cycle-btn:disabled { opacity: 0.4; cursor: default; }
+.route-cycle-btn:not(:disabled):hover { background: rgba(24, 166, 115, 0.08); }
+
 .summit-wiki-extract { margin-top: 10px; }
 .wiki-extract-loading { color: var(--text-muted); font-size: 0.8rem; }
 .wiki-extract-text {
