@@ -371,6 +371,8 @@ function clearRoute() {
   currentRouteData = null;
   document.getElementById('routeInfo').classList.add('hidden');
   document.getElementById('routeInfoSave').classList.add('hidden');
+  document.getElementById('routeInfoClear').classList.add('hidden');
+  document.getElementById('routeInfoNavigate').classList.add('hidden');
 }
 
 function formatDuration(durationMin) {
@@ -1310,6 +1312,9 @@ function showSavedRoute(item) {
   infoEl.classList.remove('hidden');
   document.getElementById('routeInfoSave').classList.add('hidden');
   document.getElementById('routeInfoClear').classList.add('hidden');
+  const navigateEl = document.getElementById('routeInfoNavigate');
+  navigateEl.href = `https://www.google.com/maps/dir/?api=1&destination=${item.start_lat},${item.start_lng}`;
+  navigateEl.classList.remove('hidden');
   textEl.textContent = item.name
     ? `${item.name} — ${formatRouteSummary(item.distance_km || 0, item.duration_min || 0)}`
     : formatRouteSummary(item.distance_km || 0, item.duration_min || 0);
