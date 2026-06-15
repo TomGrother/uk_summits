@@ -53,11 +53,23 @@ const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.
   keepBuffer: 2,
 }).addTo(map);
 
+// Waymarked Trails - highlights hiking routes on top of any base layer
+const hikingTrailsLayer = L.tileLayer('https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png', {
+  attribution: 'Trails: &copy; <a href="https://waymarkedtrails.org">Waymarked Trails</a>',
+  maxZoom: 18,
+  detectRetina: true,
+  updateWhenZooming: false,
+  keepBuffer: 2,
+  opacity: 0.85,
+});
+
 L.control.layers({
   'Satellite': satelliteLayer,
   'Topographic': topoLayer,
   'Street': streetLayer,
-}, null, { position: 'bottomleft' }).addTo(map);
+}, {
+  'Hiking trails': hikingTrailsLayer,
+}, { position: 'bottomleft' }).addTo(map);
 
 const markerCluster = L.markerClusterGroup({
   maxClusterRadius: 50,
