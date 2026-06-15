@@ -359,14 +359,13 @@ document.getElementById('locateBtn').onclick = () => {
 // ---- Route planning (click two points to draw a walking route) ----
 
 let routePlanningActive = false;
-let routeStartMarker = null;
-let routeEndMarker = null;
+let routeMarkers = [];
 let routeLine = null;
 let currentRouteData = null;
 
 function clearRoute() {
-  if (routeStartMarker) { map.removeLayer(routeStartMarker); routeStartMarker = null; }
-  if (routeEndMarker) { map.removeLayer(routeEndMarker); routeEndMarker = null; }
+  routeMarkers.forEach(m => map.removeLayer(m));
+  routeMarkers = [];
   if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
   currentRouteData = null;
   document.getElementById('routeInfo').classList.add('hidden');
@@ -428,58 +427,52 @@ document.getElementById('routeInfoSave').onclick = async () => {
   }
 };
 
+async function recalculateRoute() {
+  const infoEl = document.getElementById('routeInfo');
+  const textEl = document.getElementById('routeInfoText');
+  infoEl.classList.remove('hidden');
+  document.getElementById('routeInfoClear').classList.remove('hidden');
+  textEl.textContent = 'Finding route...';
+
+  try {
+    const coordinates = routeMarkers.map(m => ({ lat: m.getLatLng().lat, lng: m.getLatLng().lng }));
+    const res = await fetch(`${API}/summits/route`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coordinates }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not find a route');
+
+    if (routeLine) map.removeLayer(routeLine);
+    const coords = data.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+    routeLine = L.polyline(coords, { color: '#1a73e8', weight: 5, opacity: 0.85 }).addTo(map);
+    map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+
+    textEl.textContent = formatRouteSummary(data.distanceKm, data.durationMin);
+    currentRouteData = {
+      start: coordinates[0],
+      end: coordinates[coordinates.length - 1],
+      geometry: data.geometry,
+      distanceKm: data.distanceKm,
+      durationMin: data.durationMin,
+    };
+    document.getElementById('routeInfoSave').classList.remove('hidden');
+  } catch (err) {
+    textEl.textContent = err.message;
+  }
+}
+
 map.on('click', async (e) => {
   if (!routePlanningActive) return;
 
-  if (!routeStartMarker) {
-    if (routeLine) clearRoute();
-    routeStartMarker = L.marker(e.latlng, { title: 'Start' }).addTo(map);
-    return;
+  const label = routeMarkers.length === 0 ? 'Start' : `Point ${routeMarkers.length + 1}`;
+  const marker = L.marker(e.latlng, { title: label }).addTo(map);
+  routeMarkers.push(marker);
+
+  if (routeMarkers.length >= 2) {
+    await recalculateRoute();
   }
-
-  if (!routeEndMarker) {
-    routeEndMarker = L.marker(e.latlng, { title: 'End' }).addTo(map);
-
-    const infoEl = document.getElementById('routeInfo');
-    const textEl = document.getElementById('routeInfoText');
-    infoEl.classList.remove('hidden');
-    document.getElementById('routeInfoClear').classList.remove('hidden');
-    textEl.textContent = 'Finding route...';
-
-    try {
-      const res = await fetch(`${API}/summits/route`, {
-        method: 'POST',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          start: { lat: routeStartMarker.getLatLng().lat, lng: routeStartMarker.getLatLng().lng },
-          end: { lat: routeEndMarker.getLatLng().lat, lng: routeEndMarker.getLatLng().lng },
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Could not find a route');
-
-      const coords = data.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
-      routeLine = L.polyline(coords, { color: '#1a73e8', weight: 5, opacity: 0.85 }).addTo(map);
-      map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
-
-      textEl.textContent = formatRouteSummary(data.distanceKm, data.durationMin);
-      currentRouteData = {
-        start: { lat: routeStartMarker.getLatLng().lat, lng: routeStartMarker.getLatLng().lng },
-        end: { lat: routeEndMarker.getLatLng().lat, lng: routeEndMarker.getLatLng().lng },
-        geometry: data.geometry,
-        distanceKm: data.distanceKm,
-        durationMin: data.durationMin,
-      };
-      document.getElementById('routeInfoSave').classList.remove('hidden');
-    } catch (err) {
-      textEl.textContent = err.message;
-    }
-    return;
-  }
-
-  // Both points already set — start a new route.
-  clearRoute();
-  routeStartMarker = L.marker(e.latlng, { title: 'Start' }).addTo(map);
 });
 
 document.getElementById('sidebarToggle').onclick = () => {
@@ -1299,8 +1292,8 @@ function showSavedRoute(item) {
   setRoutePlanning(false);
   clearRoute();
 
-  routeStartMarker = L.marker([item.start_lat, item.start_lng], { title: 'Start' }).addTo(map);
-  routeEndMarker = L.marker([item.end_lat, item.end_lng], { title: 'End' }).addTo(map);
+  routeMarkers.push(L.marker([item.start_lat, item.start_lng], { title: 'Start' }).addTo(map));
+  routeMarkers.push(L.marker([item.end_lat, item.end_lng], { title: 'End' }).addTo(map));
   const coords = item.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
   routeLine = L.polyline(coords, { color: '#1a73e8', weight: 5, opacity: 0.85 }).addTo(map);
   map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });

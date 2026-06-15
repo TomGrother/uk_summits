@@ -229,10 +229,10 @@ router.delete('/plan/:id', requireAuth, (req, res) => {
 
 // Plan a walking route between two points using known paths/trails.
 router.post('/route', requireAuth, async (req, res) => {
-  const { start, end } = req.body || {};
-  if (!start || !end || typeof start.lat !== 'number' || typeof start.lng !== 'number' ||
-      typeof end.lat !== 'number' || typeof end.lng !== 'number') {
-    return res.status(400).json({ error: 'start and end coordinates are required' });
+  const { coordinates } = req.body || {};
+  if (!Array.isArray(coordinates) || coordinates.length < 2 ||
+      coordinates.some(c => !c || typeof c.lat !== 'number' || typeof c.lng !== 'number')) {
+    return res.status(400).json({ error: 'at least two coordinates are required' });
   }
 
   const apiKey = process.env.ORS_API_KEY;
@@ -246,7 +246,7 @@ router.post('/route', requireAuth, async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        coordinates: [[start.lng, start.lat], [end.lng, end.lat]],
+        coordinates: coordinates.map(c => [c.lng, c.lat]),
       }),
     });
 
