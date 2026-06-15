@@ -182,42 +182,48 @@ router.get('/:id/wiki-summary', async (req, res) => {
   }
 });
 
-// Get the logged-in user's plan (summits with a saved pin location).
+// Get the logged-in user's saved routes.
 router.get('/plan', requireAuth, (req, res) => {
-  const items = db.prepare(`
-    SELECT p.summit_id, p.pin_lat, p.pin_lng, p.created_at,
-           s.name, s.classification, s.area, s.height_m, s.image
-    FROM plan_items p
-    JOIN summits s ON s.id = p.summit_id
-    WHERE p.user_id = ?
-    ORDER BY p.created_at DESC
+  const rows = db.prepare(`
+    SELECT id, name, start_lat, start_lng, end_lat, end_lng, geometry, distance_km, duration_min, created_at
+    FROM plan_items
+    WHERE user_id = ?
+    ORDER BY created_at DESC
   `).all(req.user.id);
+
+  const items = rows.map(row => ({
+    ...row,
+    geometry: JSON.parse(row.geometry),
+  }));
   res.json({ items });
 });
 
-// Add (or update) a summit in the logged-in user's plan with a pin location.
+// Save a planned route to the logged-in user's plan.
 router.post('/plan', requireAuth, (req, res) => {
-  const { summit_id, pin_lat, pin_lng } = req.body || {};
-  const summit = db.prepare('SELECT id FROM summits WHERE id = ?').get(summit_id);
-  if (!summit) return res.status(404).json({ error: 'Summit not found' });
-
-  const lat = Number(pin_lat);
-  const lng = Number(pin_lng);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    return res.status(400).json({ error: 'Invalid pin location' });
+  const { name, start, end, geometry, distance_km, duration_min } = req.body || {};
+  if (!start || !end || !geometry || typeof start.lat !== 'number' || typeof start.lng !== 'number' ||
+      typeof end.lat !== 'number' || typeof end.lng !== 'number') {
+    return res.status(400).json({ error: 'Invalid route' });
   }
 
   db.prepare(`
-    INSERT INTO plan_items (user_id, summit_id, pin_lat, pin_lng) VALUES (?, ?, ?, ?)
-    ON CONFLICT(user_id, summit_id) DO UPDATE SET pin_lat = excluded.pin_lat, pin_lng = excluded.pin_lng
-  `).run(req.user.id, summit.id, lat, lng);
+    INSERT INTO plan_items (user_id, name, start_lat, start_lng, end_lat, end_lng, geometry, distance_km, duration_min)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    req.user.id,
+    name || null,
+    start.lat, start.lng, end.lat, end.lng,
+    JSON.stringify(geometry),
+    Number.isFinite(distance_km) ? distance_km : null,
+    Number.isFinite(duration_min) ? duration_min : null,
+  );
 
   res.json({ ok: true });
 });
 
-// Remove a summit from the logged-in user's plan.
+// Remove a saved route from the logged-in user's plan.
 router.delete('/plan/:id', requireAuth, (req, res) => {
-  db.prepare('DELETE FROM plan_items WHERE user_id = ? AND summit_id = ?').run(req.user.id, req.params.id);
+  db.prepare('DELETE FROM plan_items WHERE user_id = ? AND id = ?').run(req.user.id, req.params.id);
   res.json({ ok: true });
 });
 

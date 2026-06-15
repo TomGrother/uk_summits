@@ -1553,19 +1553,6 @@ main {
   .welcome-content .welcome-actions { margin-left: 16px; margin-right: 16px; }
 }
 
-.plan-pin-hint {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin: 4px 0 12px;
-}
-
-.plan-pin-map {
-  width: 100%;
-  height: 320px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 12px;
-}
-
 .my-plan-summary {
   display: flex;
   flex-wrap: wrap;
@@ -1603,24 +1590,11 @@ main {
   overflow: hidden;
 }
 
-.my-plan-item-img {
-  width: 100%;
-  height: 130px;
-  object-fit: cover;
-  display: block;
-  background: var(--bg-muted, #f0f2f5);
-}
-
 .my-plan-item-body {
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.my-plan-item-area {
-  font-size: 0.8rem;
-  color: var(--text-muted);
 }
 
 .my-plan-item-actions {

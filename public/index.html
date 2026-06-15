@@ -40,6 +40,7 @@
     <button id="routePlanBtn" class="locate-btn route-plan-btn" aria-label="Plan a walking route" title="Plan a walking route">🧭 Plan a route</button>
     <div id="routeInfo" class="route-info hidden">
       <p id="routeInfoText"></p>
+      <button id="routeInfoSave" class="link-btn hidden">📌 Save to My Plan</button>
       <button id="routeInfoClear" class="secondary">Clear route</button>
     </div>
   </main>
@@ -281,17 +282,6 @@
       <h2>My Plan</h2>
       <div id="myPlanSummary" class="my-plan-summary"></div>
       <div id="myPlanList" class="my-plan-list"></div>
-    </div>
-  </div>
-
-  <!-- Pin drop modal for adding a summit to My Plan -->
-  <div id="planPinModal" class="modal hidden">
-    <div class="modal-content info-content">
-      <button class="close-btn" data-close-modal="planPinModal">&times;</button>
-      <h2 id="planPinTitle">Add to My Plan</h2>
-      <p class="plan-pin-hint">Tap the map to drop a pin where you'll park or start your walk &mdash; this is what "Navigate" will open in Google Maps.</p>
-      <div id="planPinMap" class="plan-pin-map"></div>
-      <button id="planPinSave" class="link-btn">Save to My Plan</button>
     </div>
   </div>
 

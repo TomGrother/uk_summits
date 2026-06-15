@@ -362,12 +362,26 @@ let routePlanningActive = false;
 let routeStartMarker = null;
 let routeEndMarker = null;
 let routeLine = null;
+let currentRouteData = null;
 
 function clearRoute() {
   if (routeStartMarker) { map.removeLayer(routeStartMarker); routeStartMarker = null; }
   if (routeEndMarker) { map.removeLayer(routeEndMarker); routeEndMarker = null; }
   if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+  currentRouteData = null;
   document.getElementById('routeInfo').classList.add('hidden');
+  document.getElementById('routeInfoSave').classList.add('hidden');
+}
+
+function formatDuration(durationMin) {
+  const mins = Math.round(durationMin);
+  const hrs = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  return hrs > 0 ? `${hrs}h ${remMins}m` : `${remMins}m`;
+}
+
+function formatRouteSummary(distanceKm, durationMin) {
+  return `${distanceKm.toFixed(1)} km • approx. ${formatDuration(durationMin)}`;
 }
 
 function setRoutePlanning(active) {
@@ -387,6 +401,28 @@ document.getElementById('routePlanBtn').onclick = () => {
 };
 
 document.getElementById('routeInfoClear').onclick = () => clearRoute();
+
+document.getElementById('routeInfoSave').onclick = async () => {
+  if (!currentRouteData) return;
+  const name = prompt('Name this route (optional):', '') || null;
+  const res = await fetch(`${API}/summits/plan`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      start: currentRouteData.start,
+      end: currentRouteData.end,
+      geometry: currentRouteData.geometry,
+      distance_km: currentRouteData.distanceKm,
+      duration_min: currentRouteData.durationMin,
+    }),
+  });
+  if (res.ok) {
+    document.getElementById('routeInfoSave').classList.add('hidden');
+  } else {
+    alert('Failed to save route to My Plan');
+  }
+};
 
 map.on('click', async (e) => {
   if (!routePlanningActive) return;
@@ -421,12 +457,15 @@ map.on('click', async (e) => {
       routeLine = L.polyline(coords, { color: '#1a73e8', weight: 5, opacity: 0.85 }).addTo(map);
       map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
 
-      const km = data.distanceKm.toFixed(1);
-      const mins = Math.round(data.durationMin);
-      const hrs = Math.floor(mins / 60);
-      const remMins = mins % 60;
-      const timeStr = hrs > 0 ? `${hrs}h ${remMins}m` : `${remMins}m`;
-      textEl.textContent = `${km} km • approx. ${timeStr}`;
+      textEl.textContent = formatRouteSummary(data.distanceKm, data.durationMin);
+      currentRouteData = {
+        start: { lat: routeStartMarker.getLatLng().lat, lng: routeStartMarker.getLatLng().lng },
+        end: { lat: routeEndMarker.getLatLng().lat, lng: routeEndMarker.getLatLng().lng },
+        geometry: data.geometry,
+        distanceKm: data.distanceKm,
+        durationMin: data.durationMin,
+      };
+      document.getElementById('routeInfoSave').classList.remove('hidden');
     } catch (err) {
       textEl.textContent = err.message;
     }
@@ -755,7 +794,6 @@ function summitDetailBody(s, opts = {}) {
     <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
     <div class="summit-links">
       ${!opts.desktop && s.wiki ? `<a class="${linkClass}" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-      ${currentUser ? `<button class="${linkClass}" data-action="add-to-plan" data-id="${s.id}">📌 Add to My Plan</button>` : ''}
     </div>
     <div class="summit-popup-tags">
       <span class="tag">${s.height_m} m</span>
@@ -873,8 +911,6 @@ function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
 
-  const planBtn = document.querySelector(`[data-action="add-to-plan"][data-id="${s.id}"]`);
-  if (planBtn) planBtn.onclick = () => openPlanPinModal(s);
 
   loadWeather(s.id);
   loadGallery(s.id);
@@ -1196,48 +1232,7 @@ function renderMyPhotosSummit(entry) {
 
 document.getElementById('myPhotosBack').onclick = () => renderMyPhotosTiles();
 
-// ---- My Plan (pin-drop + Google Maps navigation) ----
-
-let planPinMap = null;
-let planPinMarker = null;
-
-function openPlanPinModal(s) {
-  document.getElementById('planPinTitle').textContent = `Add ${s.name} to My Plan`;
-  document.getElementById('planPinModal').classList.remove('hidden');
-
-  const pinLat = s.plan_pin_lat || s.lat;
-  const pinLng = s.plan_pin_lng || s.lng;
-
-  if (!planPinMap) {
-    planPinMap = L.map('planPinMap', { attributionControl: false });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(planPinMap);
-  }
-
-  planPinMap.setView([pinLat, pinLng], 14);
-  if (planPinMarker) planPinMap.removeLayer(planPinMarker);
-  planPinMarker = L.marker([pinLat, pinLng], { draggable: true }).addTo(planPinMap);
-
-  planPinMap.on('click', (e) => planPinMarker.setLatLng(e.latlng));
-
-  // Leaflet needs a size recalc once the modal (and its map div) becomes visible.
-  setTimeout(() => planPinMap.invalidateSize(), 50);
-
-  document.getElementById('planPinSave').onclick = async () => {
-    const { lat, lng } = planPinMarker.getLatLng();
-    const res = await fetch(`${API}/summits/plan`, {
-      method: 'POST',
-      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ summit_id: s.id, pin_lat: lat, pin_lng: lng }),
-    });
-    if (res.ok) {
-      document.getElementById('planPinModal').classList.add('hidden');
-    } else {
-      alert('Failed to save to My Plan');
-    }
-  };
-}
+// ---- My Plan (saved routes) ----
 
 async function openMyPlan() {
   const list = document.getElementById('myPlanList');
@@ -1247,41 +1242,34 @@ async function openMyPlan() {
   const res = await fetch(`${API}/summits/plan`, { headers: authHeaders() });
   const { items } = await res.json();
 
-  const totalHeight = items.reduce((sum, item) => sum + (item.height_m || 0), 0);
-  const byClass = new Map();
-  items.forEach(item => {
-    const key = item.classification || 'Other';
-    byClass.set(key, (byClass.get(key) || 0) + 1);
-  });
-  const topClass = [...byClass.entries()].sort((a, b) => b[1] - a[1])[0];
+  const totalDistance = items.reduce((sum, item) => sum + (item.distance_km || 0), 0);
+  const totalDuration = items.reduce((sum, item) => sum + (item.duration_min || 0), 0);
 
   document.getElementById('myPlanSummary').innerHTML = `
-    <div class="my-plan-summary-stat"><strong>${items.length}</strong><span>Summit${items.length === 1 ? '' : 's'} planned</span></div>
-    <div class="my-plan-summary-stat"><strong>${totalHeight.toLocaleString()} m</strong><span>Combined height</span></div>
-    <div class="my-plan-summary-stat"><strong>${topClass ? topClass[0] : '—'}</strong><span>Most planned type</span></div>
+    <div class="my-plan-summary-stat"><strong>${items.length}</strong><span>Route${items.length === 1 ? '' : 's'} saved</span></div>
+    <div class="my-plan-summary-stat"><strong>${totalDistance.toFixed(1)} km</strong><span>Combined distance</span></div>
+    <div class="my-plan-summary-stat"><strong>${formatDuration(totalDuration)}</strong><span>Combined time</span></div>
   `;
 
   if (!items.length) {
-    list.innerHTML = '<p class="my-plan-empty">Your plan is empty. Add a summit from its map popup with "Add to My Plan".</p>';
+    list.innerHTML = '<p class="my-plan-empty">Your plan is empty. Use "Plan a route" on the map, then "Save to My Plan".</p>';
     return;
   }
 
-  list.innerHTML = items.map(item => `
+  list.innerHTML = items.map((item, i) => `
     <div class="my-plan-item">
-      ${item.image ? `<img class="my-plan-item-img" src="${item.image}" alt="${item.name}" loading="lazy" />` : ''}
       <div class="my-plan-item-body">
-        <strong>${item.name}</strong>
+        <strong>${item.name || `Route ${i + 1}`}</strong>
         <div class="summit-popup-tags">
-          ${item.classification ? `<span class="tag tag-class">${item.classification}</span>` : ''}
-          ${item.height_m ? `<span class="tag">${item.height_m} m</span>` : ''}
+          ${item.distance_km != null ? `<span class="tag">${item.distance_km.toFixed(1)} km</span>` : ''}
+          ${item.duration_min != null ? `<span class="tag">${formatDuration(item.duration_min)}</span>` : ''}
         </div>
-        ${item.area ? `<span class="my-plan-item-area">${item.area}</span>` : ''}
       </div>
       <div class="my-plan-item-actions">
-        <button class="secondary" data-zoom-plan="${item.summit_id}">📍 Show on map</button>
+        <button class="secondary" data-open-route="${item.id}">🗺️ Show route</button>
         <div class="my-plan-item-links">
-          <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.pin_lat},${item.pin_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
-          <button class="secondary" data-remove-plan="${item.summit_id}">Remove</button>
+          <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.end_lat},${item.end_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
+          <button class="secondary" data-remove-plan="${item.id}">Remove</button>
         </div>
       </div>
     </div>
@@ -1293,12 +1281,31 @@ async function openMyPlan() {
       openMyPlan();
     };
   });
-  list.querySelectorAll('[data-zoom-plan]').forEach(btn => {
+  list.querySelectorAll('[data-open-route]').forEach(btn => {
     btn.onclick = () => {
+      const item = items.find(i => String(i.id) === btn.dataset.openRoute);
       document.getElementById('myPlanModal').classList.add('hidden');
-      focusSummit(Number(btn.dataset.zoomPlan));
+      showSavedRoute(item);
     };
   });
+}
+
+function showSavedRoute(item) {
+  clearRoute();
+  setRoutePlanning(false);
+
+  routeStartMarker = L.marker([item.start_lat, item.start_lng], { title: 'Start' }).addTo(map);
+  routeEndMarker = L.marker([item.end_lat, item.end_lng], { title: 'End' }).addTo(map);
+  const coords = item.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+  routeLine = L.polyline(coords, { color: '#1a73e8', weight: 5, opacity: 0.85 }).addTo(map);
+  map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+
+  const infoEl = document.getElementById('routeInfo');
+  const textEl = document.getElementById('routeInfoText');
+  infoEl.classList.remove('hidden');
+  textEl.textContent = item.name
+    ? `${item.name} — ${formatRouteSummary(item.distance_km || 0, item.duration_min || 0)}`
+    : formatRouteSummary(item.distance_km || 0, item.duration_min || 0);
 }
 
 let lightboxImages = [];

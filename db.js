@@ -71,11 +71,15 @@ CREATE TABLE IF NOT EXISTS summit_reviews (
 CREATE TABLE IF NOT EXISTS plan_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  summit_id INTEGER NOT NULL REFERENCES summits(id) ON DELETE CASCADE,
-  pin_lat REAL NOT NULL,
-  pin_lng REAL NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  UNIQUE(user_id, summit_id)
+  name TEXT,
+  start_lat REAL NOT NULL,
+  start_lng REAL NOT NULL,
+  end_lat REAL NOT NULL,
+  end_lng REAL NOT NULL,
+  geometry TEXT NOT NULL,
+  distance_km REAL,
+  duration_min REAL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_plan_items_user ON plan_items(user_id);
@@ -88,6 +92,30 @@ CREATE INDEX IF NOT EXISTS idx_friendships_recipient ON friendships(recipient_id
 `);
 
 db.exec('DROP TABLE IF EXISTS summit_routes');
+
+// plan_items schema changed from per-summit pins to saved routes; drop and recreate if old shape.
+{
+  const planColumns = db.prepare("PRAGMA table_info(plan_items)").all().map(c => c.name);
+  if (planColumns.length && !planColumns.includes('geometry')) {
+    db.exec('DROP TABLE plan_items');
+    db.exec(`
+      CREATE TABLE plan_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name TEXT,
+        start_lat REAL NOT NULL,
+        start_lng REAL NOT NULL,
+        end_lat REAL NOT NULL,
+        end_lng REAL NOT NULL,
+        geometry TEXT NOT NULL,
+        distance_km REAL,
+        duration_min REAL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      CREATE INDEX IF NOT EXISTS idx_plan_items_user ON plan_items(user_id);
+    `);
+  }
+}
 
 const summitColumns = db.prepare("PRAGMA table_info(summits)").all().map(c => c.name);
 if (!summitColumns.includes('area')) {
