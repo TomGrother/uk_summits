@@ -847,6 +847,8 @@ main {
 .detail-panel .summit-popup-image img,
 .detail-panel .summit-popup-image svg { height: 160px; }
 .detail-panel .summit-popup-body { padding: 14px 16px 16px; }
+.detail-panel .summit-links { gap: 8px 16px; }
+.detail-panel .wiki-link { font-size: 0.95rem; }
 .detail-close {
   position: absolute;
   top: 8px;
