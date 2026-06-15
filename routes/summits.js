@@ -202,8 +202,12 @@ router.get('/:id/route', async (req, res) => {
     const overpassQuery = `[out:json];node(around:3000,${summit.lat},${summit.lng})[amenity=parking];out;`;
     const overpassRes = await fetch('https://overpass-api.de/api/interpreter', {
       method: 'POST',
-      body: overpassQuery,
-      headers: { 'Content-Type': 'text/plain' },
+      body: `data=${encodeURIComponent(overpassQuery)}`,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+        'User-Agent': 'SummitStack/1.0 (https://uksummits-production.up.railway.app)',
+      },
     });
     if (!overpassRes.ok) {
       const body = await overpassRes.text();
