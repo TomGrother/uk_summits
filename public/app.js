@@ -356,6 +356,88 @@ document.getElementById('locateBtn').onclick = () => {
   );
 };
 
+// ---- Route planning (click two points to draw a walking route) ----
+
+let routePlanningActive = false;
+let routeStartMarker = null;
+let routeEndMarker = null;
+let routeLine = null;
+
+function clearRoute() {
+  if (routeStartMarker) { map.removeLayer(routeStartMarker); routeStartMarker = null; }
+  if (routeEndMarker) { map.removeLayer(routeEndMarker); routeEndMarker = null; }
+  if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+  document.getElementById('routeInfo').classList.add('hidden');
+}
+
+function setRoutePlanning(active) {
+  routePlanningActive = active;
+  const btn = document.getElementById('routePlanBtn');
+  btn.classList.toggle('active', active);
+  map.getContainer().style.cursor = active ? 'crosshair' : '';
+  if (!active) clearRoute();
+}
+
+document.getElementById('routePlanBtn').onclick = () => {
+  if (!currentUser) {
+    openAuthModal('login');
+    return;
+  }
+  setRoutePlanning(!routePlanningActive);
+};
+
+document.getElementById('routeInfoClear').onclick = () => clearRoute();
+
+map.on('click', async (e) => {
+  if (!routePlanningActive) return;
+
+  if (!routeStartMarker) {
+    if (routeLine) clearRoute();
+    routeStartMarker = L.marker(e.latlng, { title: 'Start' }).addTo(map);
+    return;
+  }
+
+  if (!routeEndMarker) {
+    routeEndMarker = L.marker(e.latlng, { title: 'End' }).addTo(map);
+
+    const infoEl = document.getElementById('routeInfo');
+    const textEl = document.getElementById('routeInfoText');
+    infoEl.classList.remove('hidden');
+    textEl.textContent = 'Finding route...';
+
+    try {
+      const res = await fetch(`${API}/summits/route`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start: { lat: routeStartMarker.getLatLng().lat, lng: routeStartMarker.getLatLng().lng },
+          end: { lat: routeEndMarker.getLatLng().lat, lng: routeEndMarker.getLatLng().lng },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not find a route');
+
+      const coords = data.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+      routeLine = L.polyline(coords, { color: '#1a73e8', weight: 5, opacity: 0.85 }).addTo(map);
+      map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+
+      const km = data.distanceKm.toFixed(1);
+      const mins = Math.round(data.durationMin);
+      const hrs = Math.floor(mins / 60);
+      const remMins = mins % 60;
+      const timeStr = hrs > 0 ? `${hrs}h ${remMins}m` : `${remMins}m`;
+      textEl.textContent = `${km} km • approx. ${timeStr}`;
+    } catch (err) {
+      textEl.textContent = err.message;
+    }
+    return;
+  }
+
+  // Both points already set — start a new route.
+  clearRoute();
+  routeStartMarker = L.marker(e.latlng, { title: 'Start' }).addTo(map);
+});
+
 document.getElementById('sidebarToggle').onclick = () => {
   document.getElementById('sidebar').classList.toggle('open');
 };

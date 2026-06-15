@@ -221,4 +221,46 @@ router.delete('/plan/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// Plan a walking route between two points using known paths/trails.
+router.post('/route', requireAuth, async (req, res) => {
+  const { start, end } = req.body || {};
+  if (!start || !end || typeof start.lat !== 'number' || typeof start.lng !== 'number' ||
+      typeof end.lat !== 'number' || typeof end.lng !== 'number') {
+    return res.status(400).json({ error: 'start and end coordinates are required' });
+  }
+
+  const apiKey = process.env.ORS_API_KEY;
+  if (!apiKey) return res.status(503).json({ error: 'Routing is not configured' });
+
+  try {
+    const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-hiking/geojson', {
+      method: 'POST',
+      headers: {
+        Authorization: apiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        coordinates: [[start.lng, start.lat], [end.lng, end.lat]],
+      }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('ORS routing failed:', response.status, text);
+      return res.status(502).json({ error: 'Could not find a route between those points' });
+    }
+
+    const data = await response.json();
+    const feature = data.features[0];
+    res.json({
+      geometry: feature.geometry,
+      distanceKm: feature.properties.summary.distance / 1000,
+      durationMin: feature.properties.summary.duration / 60,
+    });
+  } catch (err) {
+    console.error('Route fetch failed:', err.message);
+    res.status(502).json({ error: 'Could not find a route between those points' });
+  }
+});
+
 module.exports = router;
