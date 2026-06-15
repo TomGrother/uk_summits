@@ -581,10 +581,20 @@ function summitImage(s) {
   `;
 }
 
+let activeSummitId = null;
+
+function setActiveSummit(id) {
+  const prev = activeSummitId;
+  activeSummitId = id;
+  if (prev != null) updateMarker(prev);
+  if (id != null) updateMarker(id);
+}
+
 function iconFor(s) {
   const color = s.completed ? '#2e7d32' : '#c0392b';
+  const active = s.id === activeSummitId;
   return L.divIcon({
-    className: 'summit-marker',
+    className: `summit-marker${active ? ' summit-marker-active' : ''}`,
     html: `<div class="summit-pin" style="--pin-color:${color}"></div>`,
     iconSize: [22, 22],
     iconAnchor: [11, 20],
@@ -606,6 +616,7 @@ function renderMarkers() {
       marker.on('click', () => {
         marker.closePopup();
         openDetailPanel(s);
+        setActiveSummit(s.id);
         const point = map.project(marker.getLatLng(), map.getZoom());
         const target = point.add([170, 0]);
         map.panTo(map.unproject(target, map.getZoom()), { animate: true });
@@ -614,12 +625,14 @@ function renderMarkers() {
       marker.bindPopup(popupHtml(s), { minWidth: 240, maxWidth: 280, autoPan: true, autoPanPadding: [20, 20], className: 'summit-popup-wrapper' });
       marker.on('popupopen', () => {
         bindPopupActions(s, marker);
+        setActiveSummit(s.id);
         setTimeout(() => {
           const point = map.project(marker.getLatLng(), map.getZoom());
           const target = point.subtract([0, map.getSize().y / 2 - 40]);
           map.setView(map.unproject(target, map.getZoom()), map.getZoom(), { animate: true });
         }, 0);
       });
+      marker.on('popupclose', () => setActiveSummit(null));
       marker.on('mouseover', () => marker.openPopup());
     }
     markers.set(s.id, marker);
@@ -761,6 +774,7 @@ function closeDetailPanel() {
   const panel = document.getElementById('detailPanel');
   panel.classList.remove('open');
   delete panel.dataset.summitId;
+  setActiveSummit(null);
 }
 
 function starString(rating) {
