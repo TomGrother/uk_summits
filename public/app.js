@@ -67,9 +67,28 @@ L.control.layers({
   'Satellite': satelliteLayer,
   'Topographic': topoLayer,
   'Street': streetLayer,
-}, {
-  'Hiking trails': hikingTrailsLayer,
-}, { position: 'bottomleft' }).addTo(map);
+}, null, { position: 'bottomleft' }).addTo(map);
+
+// Separate standalone toggle for the hiking trails overlay.
+const TrailsToggle = L.Control.extend({
+  options: { position: 'bottomleft' },
+  onAdd() {
+    const container = L.DomUtil.create('div', 'leaflet-bar trails-toggle');
+    const label = L.DomUtil.create('label', '', container);
+    const checkbox = L.DomUtil.create('input', '', label);
+    checkbox.type = 'checkbox';
+    label.appendChild(document.createTextNode(' Hiking trails'));
+
+    L.DomEvent.disableClickPropagation(container);
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) map.addLayer(hikingTrailsLayer);
+      else map.removeLayer(hikingTrailsLayer);
+    });
+
+    return container;
+  },
+});
+map.addControl(new TrailsToggle());
 
 const markerCluster = L.markerClusterGroup({
   maxClusterRadius: 50,
