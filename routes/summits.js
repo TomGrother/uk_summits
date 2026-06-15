@@ -205,7 +205,10 @@ router.get('/:id/route', async (req, res) => {
       body: overpassQuery,
       headers: { 'Content-Type': 'text/plain' },
     });
-    if (!overpassRes.ok) throw new Error(`Overpass responded ${overpassRes.status}`);
+    if (!overpassRes.ok) {
+      const body = await overpassRes.text();
+      throw new Error(`Overpass responded ${overpassRes.status}: ${body.slice(0, 200)}`);
+    }
     const overpassJson = await overpassRes.json();
     const parkingNodes = overpassJson.elements || [];
     if (!parkingNodes.length) return res.status(404).json({ error: 'No nearby car park found' });
@@ -225,7 +228,10 @@ router.get('/:id/route', async (req, res) => {
         coordinates: [[parking.lon, parking.lat], [summit.lng, summit.lat]],
       }),
     });
-    if (!orsRes.ok) throw new Error(`ORS responded ${orsRes.status}`);
+    if (!orsRes.ok) {
+      const body = await orsRes.text();
+      throw new Error(`ORS responded ${orsRes.status}: ${body.slice(0, 200)}`);
+    }
     const orsJson = await orsRes.json();
     const feature = orsJson.features && orsJson.features[0];
     if (!feature) throw new Error('No route returned');
@@ -240,7 +246,7 @@ router.get('/:id/route', async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error('Route lookup failed:', err.message);
-    res.status(502).json({ error: 'Route lookup failed' });
+    res.status(502).json({ error: `Route lookup failed: ${err.message}` });
   }
 });
 
