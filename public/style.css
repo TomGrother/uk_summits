@@ -1467,11 +1467,20 @@ main {
   .welcome-content .welcome-actions { margin-left: 16px; margin-right: 16px; }
 }
 
+.leaflet-bottom.leaflet-left {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
+}
+
 .trails-toggle {
   background: var(--surface);
   padding: 6px 10px;
   font-size: 0.85rem;
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  margin: 0 !important;
 }
 .trails-toggle label {
   display: flex;
