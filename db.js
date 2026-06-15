@@ -94,6 +94,15 @@ if (!summitColumns.includes('alt_name')) {
 if (!summitColumns.includes('wiki_extract')) {
   db.exec('ALTER TABLE summits ADD COLUMN wiki_extract TEXT');
 }
+if (!summitColumns.includes('route_start_lat')) {
+  db.exec('ALTER TABLE summits ADD COLUMN route_start_lat REAL');
+}
+if (!summitColumns.includes('route_start_lng')) {
+  db.exec('ALTER TABLE summits ADD COLUMN route_start_lng REAL');
+}
+if (!summitColumns.includes('route_start_name')) {
+  db.exec('ALTER TABLE summits ADD COLUMN route_start_name TEXT');
+}
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);
 if (!userColumns.includes('is_admin')) {

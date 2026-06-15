@@ -183,18 +183,17 @@ router.get('/:id/wiki-summary', async (req, res) => {
 });
 
 // Walking route from the nearest car park to the summit (pilot: Ben Nevis only).
-// Car park is hardcoded for this pilot rather than queried live from Overpass,
-// whose public API is too unreliable for on-demand requests.
-const ROUTE_ENABLED_SUMMITS = new Map([
-  [2036, { lat: 56.8094, lng: -5.0726, name: 'Glen Nevis Visitor Centre car park' }],
-]);
+// The car park location is pre-computed offline (lib/backfillTrailheads.js) and
+// stored on the summit row, since Overpass is too unreliable for on-demand requests.
 const routeCache = new Map();
 
 router.get('/:id/route', async (req, res) => {
-  const summit = db.prepare('SELECT id, lat, lng FROM summits WHERE id = ?').get(req.params.id);
+  const summit = db.prepare('SELECT id, lat, lng, route_start_lat, route_start_lng, route_start_name FROM summits WHERE id = ?').get(req.params.id);
   if (!summit) return res.status(404).json({ error: 'Summit not found' });
-  const parkingSpot = ROUTE_ENABLED_SUMMITS.get(summit.id);
-  if (!parkingSpot) return res.status(404).json({ error: 'Routing not available for this summit' });
+  if (summit.route_start_lat == null || summit.route_start_lng == null) {
+    return res.status(404).json({ error: 'Routing not available for this summit' });
+  }
+  const parkingSpot = { lat: summit.route_start_lat, lng: summit.route_start_lng, name: summit.route_start_name };
 
   const cached = routeCache.get(summit.id);
   if (cached) return res.json(cached);
