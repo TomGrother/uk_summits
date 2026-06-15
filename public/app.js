@@ -367,7 +367,11 @@ function focusSummit(id) {
   const marker = markers.get(id);
   if (!summit || !marker) return;
   map.setView([summit.lat, summit.lng], Math.max(map.getZoom(), 12));
-  markerCluster.zoomToShowLayer(marker, () => marker.openPopup());
+  if (isDesktopView()) {
+    markerCluster.zoomToShowLayer(marker, () => openDetailPanel(summit));
+  } else {
+    markerCluster.zoomToShowLayer(marker, () => marker.openPopup());
+  }
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
     setTimeout(() => map.invalidateSize(), 250);
@@ -578,9 +582,16 @@ function renderMarkers() {
   summits.forEach(s => {
     const marker = L.marker([s.lat, s.lng], { icon: iconFor(s) });
 
-    marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
-    marker.on('popupopen', () => bindPopupActions(s, marker));
-    marker.on('mouseover', () => marker.openPopup());
+    if (isDesktopView()) {
+      marker.bindPopup(hoverPopupHtml(s), { minWidth: 160, className: 'summit-popup-wrapper summit-popup-hover', closeButton: false, autoPan: false });
+      marker.on('mouseover', () => marker.openPopup());
+      marker.on('mouseout', () => marker.closePopup());
+      marker.on('click', () => { marker.closePopup(); openDetailPanel(s); });
+    } else {
+      marker.bindPopup(popupHtml(s), { minWidth: 240, className: 'summit-popup-wrapper' });
+      marker.on('popupopen', () => bindPopupActions(s, marker));
+      marker.on('mouseover', () => marker.openPopup());
+    }
     markers.set(s.id, marker);
     markerCluster.addLayer(marker);
   });
@@ -594,48 +605,104 @@ function updateMarker(id) {
   if (!summit || !marker) return;
 
   marker.setIcon(iconFor(summit));
-  marker.setPopupContent(popupHtml(summit));
-  bindPopupActions(summit, marker);
+
+  if (isDesktopView()) {
+    marker.setPopupContent(hoverPopupHtml(summit));
+    const panel = document.getElementById('detailPanel');
+    if (panel.classList.contains('open') && panel.dataset.summitId === String(id)) {
+      openDetailPanel(summit);
+    }
+  } else {
+    marker.setPopupContent(popupHtml(summit));
+    bindPopupActions(summit, marker);
+  }
+}
+
+function summitDetailBody(s) {
+  return `
+    <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
+    <div class="summit-links">
+      ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
+      <a class="wiki-link" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">🧭 Navigate &rarr;</a>
+    </div>
+    <div class="summit-popup-tags">
+      <span class="tag">${s.height_m} m</span>
+      <span class="tag">${s.region}</span>
+      ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
+    </div>
+    ${currentUser
+      ? `<button class="popup-btn ${s.completed ? 'is-done' : ''}" data-action="toggle" data-id="${s.id}">
+           ${s.completed ? '✓ Climbed' : 'Mark as climbed'}
+         </button>`
+      : '<p class="popup-hint">Login to track this summit</p>'}
+    <div class="summit-weather" data-weather="${s.id}">
+      <p class="weather-loading">Loading weather&hellip;</p>
+    </div>
+    <div class="summit-gallery" data-gallery="${s.id}">
+      <p class="gallery-loading">Loading photos&hellip;</p>
+    </div>
+    ${currentUser ? `
+      <label class="popup-upload-btn">
+        📷 Add a photo
+        <input type="file" accept="image/*" data-upload="${s.id}" hidden />
+      </label>
+    ` : ''}
+    <div class="summit-reviews-summary" data-reviews="${s.id}">
+      <p class="reviews-loading">Loading reviews&hellip;</p>
+    </div>
+  `;
+}
+
+function summitImageHtml(s) {
+  return s.image ? `<img src="${s.image}" alt="${s.name}" loading="lazy" />` : summitImage(s);
 }
 
 function popupHtml(s) {
   return `
     <div class="summit-popup">
-      <div class="summit-popup-image">${s.image ? `<img src="${s.image}" alt="${s.name}" loading="lazy" />` : summitImage(s)}</div>
+      <div class="summit-popup-image">${summitImageHtml(s)}</div>
+      <div class="summit-popup-body">${summitDetailBody(s)}</div>
+    </div>
+  `;
+}
+
+function hoverPopupHtml(s) {
+  return `
+    <div class="summit-popup summit-popup-mini">
+      <div class="summit-popup-image">${summitImageHtml(s)}</div>
       <div class="summit-popup-body">
         <h3>${s.name}${s.alt_name ? ` <span class="alt-name">(${s.alt_name})</span>` : ''}</h3>
-        <div class="summit-links">
-          ${s.wiki ? `<a class="wiki-link" href="${s.wiki}" target="_blank" rel="noopener">Wikipedia &rarr;</a>` : ''}
-          <a class="wiki-link" href="https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}" target="_blank" rel="noopener">🧭 Navigate &rarr;</a>
-        </div>
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           <span class="tag">${s.region}</span>
-          ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
-        </div>
-        ${currentUser
-          ? `<button class="popup-btn ${s.completed ? 'is-done' : ''}" data-action="toggle" data-id="${s.id}">
-               ${s.completed ? '✓ Climbed' : 'Mark as climbed'}
-             </button>`
-          : '<p class="popup-hint">Login to track this summit</p>'}
-        <div class="summit-weather" data-weather="${s.id}">
-          <p class="weather-loading">Loading weather&hellip;</p>
-        </div>
-        <div class="summit-gallery" data-gallery="${s.id}">
-          <p class="gallery-loading">Loading photos&hellip;</p>
-        </div>
-        ${currentUser ? `
-          <label class="popup-upload-btn">
-            📷 Add a photo
-            <input type="file" accept="image/*" data-upload="${s.id}" hidden />
-          </label>
-        ` : ''}
-        <div class="summit-reviews-summary" data-reviews="${s.id}">
-          <p class="reviews-loading">Loading reviews&hellip;</p>
         </div>
       </div>
     </div>
   `;
+}
+
+const DESKTOP_BREAKPOINT = 900;
+function isDesktopView() {
+  return window.innerWidth > DESKTOP_BREAKPOINT;
+}
+
+function openDetailPanel(s) {
+  const panel = document.getElementById('detailPanel');
+  panel.dataset.summitId = s.id;
+  panel.innerHTML = `
+    <button class="detail-close" aria-label="Close details">&times;</button>
+    <div class="summit-popup-image">${summitImageHtml(s)}</div>
+    <div class="summit-popup-body">${summitDetailBody(s)}</div>
+  `;
+  panel.classList.add('open');
+  panel.querySelector('.detail-close').onclick = closeDetailPanel;
+  bindPopupActions(s, markers.get(s.id));
+}
+
+function closeDetailPanel() {
+  const panel = document.getElementById('detailPanel');
+  panel.classList.remove('open');
+  delete panel.dataset.summitId;
 }
 
 function starString(rating) {
@@ -1022,8 +1089,10 @@ async function toggleCompletion(id) {
   renderProgress();
   renderRegionList();
 
-  const m = markers.get(id);
-  if (m) markerCluster.zoomToShowLayer(m, () => m.openPopup());
+  if (!isDesktopView()) {
+    const m = markers.get(id);
+    if (m) markerCluster.zoomToShowLayer(m, () => m.openPopup());
+  }
 }
 
 // --- Auth modal ---

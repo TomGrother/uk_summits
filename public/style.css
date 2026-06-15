@@ -817,6 +817,57 @@ main {
 }
 .marker-cluster span { text-shadow: 0 1px 1px rgba(0,0,0,0.3); }
 
+/* --- Desktop hover popup (minimal) --- */
+.summit-popup-hover .leaflet-popup-content { width: 160px !important; }
+.summit-popup-hover .leaflet-popup-content-wrapper { box-shadow: var(--shadow-lg); }
+.summit-popup-mini .summit-popup-image img,
+.summit-popup-mini .summit-popup-image svg { height: 60px; }
+.summit-popup-mini .summit-popup-body { padding: 8px 10px; }
+.summit-popup-mini h3 { font-size: 0.9rem; margin: 0 0 4px; }
+.summit-popup-mini .summit-popup-tags { margin: 0; }
+
+/* --- Desktop detail panel --- */
+.detail-panel {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 340px;
+  max-width: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-panel .summit-popup-image img,
+.detail-panel .summit-popup-image svg { height: 160px; }
+.detail-panel .summit-popup-body { padding: 14px 16px 16px; }
+.detail-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+}
+.detail-close:hover { background: rgba(0,0,0,0.65); }
+
+@media (min-width: 901px) {
+  .detail-panel { display: block; }
+}
+
 /* --- Summit popup card --- */
 .leaflet-popup-content-wrapper { padding: 0; overflow: hidden; border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); }
 .leaflet-popup-content { margin: 0; width: 240px !important; }
