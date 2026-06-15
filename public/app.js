@@ -1131,23 +1131,42 @@ async function openMyPlan() {
   const res = await fetch(`${API}/summits/plan`, { headers: authHeaders() });
   const { items } = await res.json();
 
+  const totalHeight = items.reduce((sum, item) => sum + (item.height_m || 0), 0);
+  const byClass = new Map();
+  items.forEach(item => {
+    const key = item.classification || 'Other';
+    byClass.set(key, (byClass.get(key) || 0) + 1);
+  });
+  const topClass = [...byClass.entries()].sort((a, b) => b[1] - a[1])[0];
+
+  document.getElementById('myPlanSummary').innerHTML = `
+    <div class="my-plan-summary-stat"><strong>${items.length}</strong><span>Summit${items.length === 1 ? '' : 's'} planned</span></div>
+    <div class="my-plan-summary-stat"><strong>${totalHeight.toLocaleString()} m</strong><span>Combined height</span></div>
+    <div class="my-plan-summary-stat"><strong>${topClass ? topClass[0] : '—'}</strong><span>Most planned type</span></div>
+  `;
+
   if (!items.length) {
-    list.innerHTML = '<p>Your plan is empty. Add a summit from its map popup with "Add to My Plan".</p>';
+    list.innerHTML = '<p class="my-plan-empty">Your plan is empty. Add a summit from its map popup with "Add to My Plan".</p>';
     return;
   }
 
   list.innerHTML = items.map(item => `
     <div class="my-plan-item">
+      ${item.image ? `<img class="my-plan-item-img" src="${item.image}" alt="${item.name}" loading="lazy" />` : ''}
       <div class="my-plan-item-body">
         <strong>${item.name}</strong>
         <div class="summit-popup-tags">
           ${item.classification ? `<span class="tag tag-class">${item.classification}</span>` : ''}
           ${item.height_m ? `<span class="tag">${item.height_m} m</span>` : ''}
         </div>
+        ${item.area ? `<span class="my-plan-item-area">${item.area}</span>` : ''}
       </div>
       <div class="my-plan-item-actions">
-        <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.pin_lat},${item.pin_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
-        <button class="secondary" data-remove-plan="${item.summit_id}">Remove</button>
+        <button class="secondary" data-zoom-plan="${item.summit_id}">📍 Show on map</button>
+        <div class="my-plan-item-links">
+          <a class="link-btn" href="https://www.google.com/maps/dir/?api=1&destination=${item.pin_lat},${item.pin_lng}" target="_blank" rel="noopener">🧭 Navigate</a>
+          <button class="secondary" data-remove-plan="${item.summit_id}">Remove</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -1156,6 +1175,12 @@ async function openMyPlan() {
     btn.onclick = async () => {
       await fetch(`${API}/summits/plan/${btn.dataset.removePlan}`, { method: 'DELETE', headers: authHeaders() });
       openMyPlan();
+    };
+  });
+  list.querySelectorAll('[data-zoom-plan]').forEach(btn => {
+    btn.onclick = () => {
+      document.getElementById('myPlanModal').classList.add('hidden');
+      focusSummit(Number(btn.dataset.zoomPlan));
     };
   });
 }
