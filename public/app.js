@@ -646,6 +646,7 @@ function summitDetailBody(s, opts = {}) {
     <div class="summit-popup-tags">
       <span class="tag">${s.height_m} m</span>
       ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
+      ${opts.desktop ? `<span class="tag">${s.region}</span>` : ''}
     </div>
     ${opts.desktop && s.wiki ? `
       <div class="summit-wiki-extract" data-wiki="${s.id}">
@@ -697,6 +698,7 @@ function hoverPopupHtml(s) {
         <div class="summit-popup-tags">
           <span class="tag">${s.height_m} m</span>
           ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
+          <span class="tag">${s.region}</span>
         </div>
       </div>
     </div>
