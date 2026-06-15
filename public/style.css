@@ -867,6 +867,12 @@ main {
 }
 .detail-panel .link-btn:hover { background: rgba(24, 166, 115, 0.08); text-decoration: none; }
 
+.route-find-btn { background: #e6550d; }
+.route-loading, .route-error { font-size: 0.8rem; color: var(--text-muted); margin: 6px 0 0; }
+.route-error { color: #c0392b; }
+.route-summary { font-size: 0.85rem; font-weight: 600; margin: 6px 0 0; }
+.parking-marker { font-size: 1.1rem; text-align: center; }
+
 .summit-wiki-extract { margin-top: 10px; }
 .wiki-extract-loading { color: var(--text-muted); font-size: 0.8rem; }
 .wiki-extract-text {

@@ -182,4 +182,66 @@ router.get('/:id/wiki-summary', async (req, res) => {
   }
 });
 
+// Walking route from the nearest car park to the summit (pilot: Ben Nevis only).
+const ROUTE_ENABLED_SUMMITS = new Set([2036]);
+const routeCache = new Map();
+
+router.get('/:id/route', async (req, res) => {
+  const summit = db.prepare('SELECT id, lat, lng FROM summits WHERE id = ?').get(req.params.id);
+  if (!summit) return res.status(404).json({ error: 'Summit not found' });
+  if (!ROUTE_ENABLED_SUMMITS.has(summit.id)) return res.status(404).json({ error: 'Routing not available for this summit' });
+
+  const cached = routeCache.get(summit.id);
+  if (cached) return res.json(cached);
+
+  const orsKey = process.env.ORS_API_KEY;
+  if (!orsKey) return res.status(503).json({ error: 'Routing not configured' });
+
+  try {
+    // Find the nearest car park within ~3km using Overpass.
+    const overpassQuery = `[out:json];node(around:3000,${summit.lat},${summit.lng})[amenity=parking];out;`;
+    const overpassRes = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: overpassQuery,
+      headers: { 'Content-Type': 'text/plain' },
+    });
+    if (!overpassRes.ok) throw new Error(`Overpass responded ${overpassRes.status}`);
+    const overpassJson = await overpassRes.json();
+    const parkingNodes = overpassJson.elements || [];
+    if (!parkingNodes.length) return res.status(404).json({ error: 'No nearby car park found' });
+
+    const distSq = (lat, lng) => (lat - summit.lat) ** 2 + (lng - summit.lng) ** 2;
+    parkingNodes.sort((a, b) => distSq(a.lat, a.lon) - distSq(b.lat, b.lon));
+    const parking = parkingNodes[0];
+
+    // Route from car park to summit using ORS foot-hiking profile.
+    const orsRes = await fetch('https://api.openrouteservice.org/v2/directions/foot-hiking/geojson', {
+      method: 'POST',
+      headers: {
+        Authorization: orsKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        coordinates: [[parking.lon, parking.lat], [summit.lng, summit.lat]],
+      }),
+    });
+    if (!orsRes.ok) throw new Error(`ORS responded ${orsRes.status}`);
+    const orsJson = await orsRes.json();
+    const feature = orsJson.features && orsJson.features[0];
+    if (!feature) throw new Error('No route returned');
+
+    const data = {
+      parking: { lat: parking.lat, lng: parking.lon, name: parking.tags?.name || 'Car park' },
+      geojson: feature.geometry,
+      distanceKm: Math.round((feature.properties.summary.distance / 1000) * 10) / 10,
+      durationMin: Math.round(feature.properties.summary.duration / 60),
+    };
+    routeCache.set(summit.id, data);
+    res.json(data);
+  } catch (err) {
+    console.error('Route lookup failed:', err.message);
+    res.status(502).json({ error: 'Route lookup failed' });
+  }
+});
+
 module.exports = router;
