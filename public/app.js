@@ -27,12 +27,36 @@ const map = L.map('map', {
 }).fitBounds(INITIAL_BOUNDS);
 
 // Esri World Imagery - aerial/satellite tiles of the UK
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   attribution: 'Tiles &copy; Esri',
   maxZoom: 18,
   detectRetina: true,
   updateWhenZooming: false,
   keepBuffer: 2,
+}).addTo(map);
+
+// OpenTopoMap - contour lines and hiking paths
+const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+  attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap (CC-BY-SA)',
+  maxZoom: 17,
+  detectRetina: true,
+  updateWhenZooming: false,
+  keepBuffer: 2,
+});
+
+// OpenStreetMap - standard street map
+const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+  maxZoom: 19,
+  detectRetina: true,
+  updateWhenZooming: false,
+  keepBuffer: 2,
+});
+
+L.control.layers({
+  'Satellite': satelliteLayer,
+  'Topographic': topoLayer,
+  'Street': streetLayer,
 }).addTo(map);
 
 const markerCluster = L.markerClusterGroup({
