@@ -57,7 +57,7 @@ L.control.layers({
   'Satellite': satelliteLayer,
   'Topographic': topoLayer,
   'Street': streetLayer,
-}).addTo(map);
+}, null, { position: 'bottomleft' }).addTo(map);
 
 const markerCluster = L.markerClusterGroup({
   maxClusterRadius: 50,
