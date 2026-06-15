@@ -94,17 +94,10 @@ if (!summitColumns.includes('alt_name')) {
 if (!summitColumns.includes('wiki_extract')) {
   db.exec('ALTER TABLE summits ADD COLUMN wiki_extract TEXT');
 }
-if (!summitColumns.includes('route_start_lat')) {
-  db.exec('ALTER TABLE summits ADD COLUMN route_start_lat REAL');
-}
-if (!summitColumns.includes('route_start_lng')) {
-  db.exec('ALTER TABLE summits ADD COLUMN route_start_lng REAL');
-}
-if (!summitColumns.includes('route_start_name')) {
-  db.exec('ALTER TABLE summits ADD COLUMN route_start_name TEXT');
-}
-if (!summitColumns.includes('route_starts')) {
-  db.exec('ALTER TABLE summits ADD COLUMN route_starts TEXT');
+for (const col of ['route_start_lat', 'route_start_lng', 'route_start_name', 'route_starts']) {
+  if (summitColumns.includes(col)) {
+    db.exec(`ALTER TABLE summits DROP COLUMN ${col}`);
+  }
 }
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map(c => c.name);

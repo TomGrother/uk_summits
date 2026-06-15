@@ -618,59 +618,6 @@ function updateMarker(id) {
   }
 }
 
-// Pilot: trailhead-to-summit routing enabled for Ben Nevis and Snowdon.
-const ROUTE_ENABLED_SUMMITS = new Set([2036, 1633]);
-let routeLine = null;
-let routeMarker = null;
-let routeIndex = 0;
-
-function clearRouteLine() {
-  if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
-  if (routeMarker) { map.removeLayer(routeMarker); routeMarker = null; }
-}
-
-async function findRoute(s, index = 0) {
-  const el = document.querySelector(`[data-route="${s.id}"]`);
-  if (!el) return;
-  routeIndex = index;
-  el.innerHTML = '<p class="route-loading">Finding route&hellip;</p>';
-
-  try {
-    const res = await fetch(`${API}/summits/${s.id}/route?index=${index}`);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Route lookup failed');
-    if (!el.isConnected) return;
-
-    const cycleControls = data.total > 1 ? `
-      <div class="route-cycle">
-        <button class="route-cycle-btn" data-route-prev="${s.id}" ${data.index === 0 ? 'disabled' : ''}>&larr;</button>
-        <span>Route ${data.index + 1} of ${data.total}</span>
-        <button class="route-cycle-btn" data-route-next="${s.id}" ${data.index === data.total - 1 ? 'disabled' : ''}>&rarr;</button>
-      </div>
-    ` : '';
-
-    el.innerHTML = `
-      <p class="route-summary">🥾 ${data.distanceKm} km &middot; ~${data.durationMin} min</p>
-      ${cycleControls}
-    `;
-
-    const prevBtn = el.querySelector(`[data-route-prev="${s.id}"]`);
-    const nextBtn = el.querySelector(`[data-route-next="${s.id}"]`);
-    if (prevBtn) prevBtn.onclick = () => findRoute(s, data.index - 1);
-    if (nextBtn) nextBtn.onclick = () => findRoute(s, data.index + 1);
-
-    clearRouteLine();
-    const latlngs = data.geojson.coordinates.map(([lng, lat]) => [lat, lng]);
-    routeLine = L.polyline(latlngs, { color: '#e6550d', weight: 4, opacity: 0.85 }).addTo(map);
-    routeMarker = L.marker([data.start.lat, data.start.lng], {
-      icon: L.divIcon({ className: 'parking-marker', html: '🚶', iconSize: [22, 22] }),
-    }).addTo(map);
-    map.fitBounds(routeLine.getBounds(), { padding: [60, 60] });
-  } catch (err) {
-    if (el.isConnected) el.innerHTML = `<p class="route-error">${escapeHtml(err.message)}</p>`;
-  }
-}
-
 function summitDetailBody(s, opts = {}) {
   const linkClass = opts.desktop ? 'wiki-link link-btn' : 'wiki-link';
   const navLabel = opts.desktop ? '🧭 Open in Google Maps' : '🧭 Navigate &rarr;';
@@ -685,11 +632,6 @@ function summitDetailBody(s, opts = {}) {
       <span class="tag">${s.region}</span>
       ${s.classification ? `<span class="tag tag-class">${s.classification}</span>` : ''}
     </div>
-    ${ROUTE_ENABLED_SUMMITS.has(s.id) ? `
-      <div class="summit-route" data-route="${s.id}">
-        <button class="popup-btn route-find-btn" data-find-route="${s.id}">🥾 Find route to summit</button>
-      </div>
-    ` : ''}
     ${opts.desktop && s.wiki ? `
       <div class="summit-wiki-extract" data-wiki="${s.id}">
         <p class="wiki-extract-loading">Loading summary&hellip;</p>
@@ -798,9 +740,6 @@ function starString(rating) {
 function bindPopupActions(s, marker) {
   const btn = document.querySelector(`[data-action="toggle"][data-id="${s.id}"]`);
   if (btn) btn.onclick = () => toggleCompletion(s.id);
-
-  const routeBtn = document.querySelector(`[data-find-route="${s.id}"]`);
-  if (routeBtn) routeBtn.onclick = () => findRoute(s);
 
   loadWeather(s.id);
   loadGallery(s.id);
